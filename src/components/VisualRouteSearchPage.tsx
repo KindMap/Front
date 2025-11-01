@@ -9,30 +9,30 @@ import { Checkbox } from './ui/checkbox';
 import { Label } from './ui/label';
 import { useVoiceGuide } from '../contexts/VoiceGuideContext';
 
-interface LowVisionRouteSearchPageProps {
+interface VisualRouteSearchPageProps {
   onRouteSelect?: (route: Route) => void;
   addToFavorites?: boolean;
 }
 
 /**
- * 저시력자를 위한 경로검색 페이지
- * 
- * 점자블록과 음성안내 등 시각 보조를 고려한 맞춤형 경로를 제공합니다.
+ * 시각장애인을 위한 경로검색 페이지
+ *
+ * 음성 안내 및 촉각 정보를 활용하여 안전한 보행 환경을 제공합니다.
  */
-export function LowVisionRouteSearchPage({ onRouteSelect, addToFavorites = false }: LowVisionRouteSearchPageProps) {
+export function VisualRouteSearchPage({ onRouteSelect, addToFavorites = false }: VisualRouteSearchPageProps) {
   const navigate = useNavigate();
   const { speak } = useVoiceGuide();
   const [departure, setDeparture] = useState('');
   const [destination, setDestination] = useState('');
   const [routes, setRoutes] = useState<Route[]>([]);
   const [searched, setSearched] = useState(false);
-  
-  // 저시력자 맞춤 옵션
+
+  // 시각장애인 맞춤 옵션
   const [options, setOptions] = useState({
-    brailleBlock: true, // 점자블록 경로
-    audioGuide: true, // 음성안내 시설
-    brightPath: true, // 밝은 조명 경로
-    simpleRoute: true, // 단순한 경로 (복잡한 교차로 회피)
+    brailleBlocks: true, // 점자블록 경로
+    audioSignals: true, // 음향 신호기
+    tactilePaving: true, // 촉각 보도블록
+    voiceGuidance: true, // 음성 안내
   });
 
   const handleSearch = () => {
@@ -41,28 +41,28 @@ export function LowVisionRouteSearchPage({ onRouteSelect, addToFavorites = false
     // TODO: 실제 API 호출 시 options를 파라미터로 전달
     const mockRoutes: Route[] = [
       {
-        id: 'lowvision-1',
+        id: 'visual-1',
         departure,
         destination,
-        duration: '27분',
-        distance: '2.4km',
-        description: '👁️ 점자블록 완비 | 음성신호등 多 | 음성안내 시스템',
+        duration: '25분',
+        distance: '1.9km',
+        description: '🔊 점자블록 완비 | 음향 신호기 12개 | 연속된 촉각 보도',
       },
       {
-        id: 'lowvision-2',
+        id: 'visual-2',
         departure,
         destination,
         duration: '30분',
-        distance: '2.6km',
-        description: '👁️ 밝은 조명 | 단순한 경로 | 촉각 보도블록',
+        distance: '2.2km',
+        description: '🔊 주요 길목 음성 안내 | 장애물 적은 경로',
       },
       {
-        id: 'lowvision-3',
+        id: 'visual-3',
         departure,
         destination,
-        duration: '33분',
-        distance: '2.9km',
-        description: '👁️ 점자 안내판 多 | 음향 신호기 | 안내견 동반 가능',
+        duration: '28분',
+        distance: '2.0km',
+        description: '🔊 지하철역 연계 | 점자 안내판 구비',
       },
     ];
 
@@ -98,9 +98,9 @@ export function LowVisionRouteSearchPage({ onRouteSelect, addToFavorites = false
               <Eye className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="mb-1">저시력자 경로검색</h1>
+              <h1 className="mb-1">시각장애인 경로검색</h1>
               <p className="text-sm text-muted-foreground">
-                점자블록과 음성안내가 있는 안전한 경로를 찾아드립니다
+                음성 안내와 점자블록 정보를 통해 안전한 경로를 찾아드립니다
               </p>
             </div>
           </div>
@@ -112,50 +112,50 @@ export function LowVisionRouteSearchPage({ onRouteSelect, addToFavorites = false
           <div className="space-y-3">
             <div className="flex items-center space-x-2">
               <Checkbox
-                id="brailleBlock"
-                checked={options.brailleBlock}
+                id="brailleBlocks"
+                checked={options.brailleBlocks}
                 onCheckedChange={(checked) =>
-                  setOptions({ ...options, brailleBlock: checked as boolean })
+                  setOptions({ ...options, brailleBlocks: checked as boolean })
                 }
               />
-              <Label htmlFor="brailleBlock" className="cursor-pointer">
-                점자블록 설치 경로만
+              <Label htmlFor="brailleBlocks" className="cursor-pointer">
+                점자블록 경로 우선
               </Label>
             </div>
             <div className="flex items-center space-x-2">
               <Checkbox
-                id="audioGuide"
-                checked={options.audioGuide}
+                id="audioSignals"
+                checked={options.audioSignals}
                 onCheckedChange={(checked) =>
-                  setOptions({ ...options, audioGuide: checked as boolean })
+                  setOptions({ ...options, audioSignals: checked as boolean })
                 }
               />
-              <Label htmlFor="audioGuide" className="cursor-pointer">
-                음성안내 시설 포함 (음향 신호기 등)
+              <Label htmlFor="audioSignals" className="cursor-pointer">
+                음향 신호기 포함
               </Label>
             </div>
             <div className="flex items-center space-x-2">
               <Checkbox
-                id="brightPath"
-                checked={options.brightPath}
+                id="tactilePaving"
+                checked={options.tactilePaving}
                 onCheckedChange={(checked) =>
-                  setOptions({ ...options, brightPath: checked as boolean })
+                  setOptions({ ...options, tactilePaving: checked as boolean })
                 }
               />
-              <Label htmlFor="brightPath" className="cursor-pointer">
-                밝은 조명 경로 우선
+              <Label htmlFor="tactilePaving" className="cursor-pointer">
+                촉각 보도블록 경로
               </Label>
             </div>
             <div className="flex items-center space-x-2">
               <Checkbox
-                id="simpleRoute"
-                checked={options.simpleRoute}
+                id="voiceGuidance"
+                checked={options.voiceGuidance}
                 onCheckedChange={(checked) =>
-                  setOptions({ ...options, simpleRoute: checked as boolean })
+                  setOptions({ ...options, voiceGuidance: checked as boolean })
                 }
               />
-              <Label htmlFor="simpleRoute" className="cursor-pointer">
-                단순한 경로 (복잡한 교차로 회피)
+              <Label htmlFor="voiceGuidance" className="cursor-pointer">
+                음성 안내 지원
               </Label>
             </div>
           </div>
@@ -186,8 +186,8 @@ export function LowVisionRouteSearchPage({ onRouteSelect, addToFavorites = false
                 onFocus={() => speak('도착지 입력란')}
               />
             </div>
-            <Button 
-              className="w-full" 
+            <Button
+              className="w-full"
               onClick={handleSearch}
               disabled={!departure || !destination}
               onMouseEnter={() => speak('경로 검색 버튼')}

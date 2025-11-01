@@ -16,7 +16,7 @@ interface ElderlyRouteSearchPageProps {
 
 /**
  * 고령자를 위한 경로검색 페이지
- * 
+ *
  * 편안하고 안전한 이동을 고려한 맞춤형 경로를 제공합니다.
  */
 export function ElderlyRouteSearchPage({ onRouteSelect, addToFavorites = false }: ElderlyRouteSearchPageProps) {
@@ -26,13 +26,13 @@ export function ElderlyRouteSearchPage({ onRouteSelect, addToFavorites = false }
   const [destination, setDestination] = useState('');
   const [routes, setRoutes] = useState<Route[]>([]);
   const [searched, setSearched] = useState(false);
-  
+
   // 고령자 맞춤 옵션
   const [options, setOptions] = useState({
     avoidStairs: true, // 계단 회피
-    restPoints: true, // 휴게 지점 포함
-    flatRoute: true, // 평탄한 경로 우선
-    safeRoute: true, // 안전한 경로 (횡단보도, 신호등 多)
+    restStops: true, // 휴식 장소 포함
+    gentleSlope: true, // 완만한 경사 우선
+    wellLit: true, // 밝은 경로
   });
 
   const handleSearch = () => {
@@ -46,7 +46,7 @@ export function ElderlyRouteSearchPage({ onRouteSelect, addToFavorites = false }
         destination,
         duration: '32분',
         distance: '2.3km',
-        description: '🏥 휴게 벤치 5곳 | 계단 없음 | 횡단보도 신호 충분',
+        description: '👴 휴게 벤치 5곳 | 계단 없음 | 횡단보도 신호 충분',
       },
       {
         id: 'elderly-2',
@@ -54,7 +54,7 @@ export function ElderlyRouteSearchPage({ onRouteSelect, addToFavorites = false }
         destination,
         duration: '28분',
         distance: '2.0km',
-        description: '🏥 쉼터 3곳 | 경사 완만 | 그늘진 경로',
+        description: '👴 쉼터 3곳 | 경사 완만 | 그늘진 경로',
       },
       {
         id: 'elderly-3',
@@ -62,7 +62,7 @@ export function ElderlyRouteSearchPage({ onRouteSelect, addToFavorites = false }
         destination,
         duration: '38분',
         distance: '2.7km',
-        description: '🏥 휴게소 多 | 엘리베이터 이용 | 의료시설 인접',
+        description: '👴 휴게소 多 | 엘리베이터 이용 | 의료시설 인접',
       },
     ];
 
@@ -119,43 +119,43 @@ export function ElderlyRouteSearchPage({ onRouteSelect, addToFavorites = false }
                 }
               />
               <Label htmlFor="avoidStairs" className="cursor-pointer">
-                계단 구간 회피
+                계단 회피
               </Label>
             </div>
             <div className="flex items-center space-x-2">
               <Checkbox
-                id="restPoints"
-                checked={options.restPoints}
+                id="restStops"
+                checked={options.restStops}
                 onCheckedChange={(checked) =>
-                  setOptions({ ...options, restPoints: checked as boolean })
+                  setOptions({ ...options, restStops: checked as boolean })
                 }
               />
-              <Label htmlFor="restPoints" className="cursor-pointer">
-                휴게 지점 포함 (벤치, 쉼터)
+              <Label htmlFor="restStops" className="cursor-pointer">
+                휴식 장소 포함 (벤치, 쉼터)
               </Label>
             </div>
             <div className="flex items-center space-x-2">
               <Checkbox
-                id="flatRoute"
-                checked={options.flatRoute}
+                id="gentleSlope"
+                checked={options.gentleSlope}
                 onCheckedChange={(checked) =>
-                  setOptions({ ...options, flatRoute: checked as boolean })
+                  setOptions({ ...options, gentleSlope: checked as boolean })
                 }
               />
-              <Label htmlFor="flatRoute" className="cursor-pointer">
-                평탄한 경로 우선 (경사 최소화)
+              <Label htmlFor="gentleSlope" className="cursor-pointer">
+                완만한 경사 우선
               </Label>
             </div>
             <div className="flex items-center space-x-2">
               <Checkbox
-                id="safeRoute"
-                checked={options.safeRoute}
+                id="wellLit"
+                checked={options.wellLit}
                 onCheckedChange={(checked) =>
-                  setOptions({ ...options, safeRoute: checked as boolean })
+                  setOptions({ ...options, wellLit: checked as boolean })
                 }
               />
-              <Label htmlFor="safeRoute" className="cursor-pointer">
-                안전한 경로 (횡단보도, 신호등 多)
+              <Label htmlFor="wellLit" className="cursor-pointer">
+                밝은 경로 우선
               </Label>
             </div>
           </div>
@@ -186,8 +186,8 @@ export function ElderlyRouteSearchPage({ onRouteSelect, addToFavorites = false }
                 onFocus={() => speak('도착지 입력란')}
               />
             </div>
-            <Button 
-              className="w-full" 
+            <Button
+              className="w-full"
               onClick={handleSearch}
               disabled={!departure || !destination}
               onMouseEnter={() => speak('경로 검색 버튼')}

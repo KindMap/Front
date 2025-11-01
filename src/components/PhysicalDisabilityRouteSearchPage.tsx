@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowRight, ArrowLeft, Check, Heart } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Check, Accessibility } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Card } from './ui/card';
@@ -9,60 +9,60 @@ import { Checkbox } from './ui/checkbox';
 import { Label } from './ui/label';
 import { useVoiceGuide } from '../contexts/VoiceGuideContext';
 
-interface PregnantRouteSearchPageProps {
+interface PhysicalDisabilityRouteSearchPageProps {
   onRouteSelect?: (route: Route) => void;
   addToFavorites?: boolean;
 }
 
 /**
- * 임산부를 위한 경로검색 페이지
- * 
- * 안전하고 편안한 이동을 고려한 맞춤형 경로를 제공합니다.
+ * 지체장애인을 위한 경로검색 페이지
+ *
+ * 휠체어, 보행 보조기구 이용자의 접근성을 고려한 경로를 제공합니다.
  */
-export function PregnantRouteSearchPage({ onRouteSelect, addToFavorites = false }: PregnantRouteSearchPageProps) {
+export function PhysicalDisabilityRouteSearchPage({ onRouteSelect, addToFavorites = false }: PhysicalDisabilityRouteSearchPageProps) {
   const navigate = useNavigate();
   const { speak } = useVoiceGuide();
   const [departure, setDeparture] = useState('');
   const [destination, setDestination] = useState('');
   const [routes, setRoutes] = useState<Route[]>([]);
   const [searched, setSearched] = useState(false);
-  
-  // 임산부 맞춤 옵션
+
+  // 지체장애인 맞춤 옵션
   const [options, setOptions] = useState({
-    gentleSlope: true, // 완만한 경사
-    restArea: true, // 휴게 공간
+    useElevator: true, // 엘리베이터 이용
     avoidStairs: true, // 계단 회피
-    medicalNearby: false, // 의료시설 인접
+    gentleSlope: true, // 완만한 경사
+    widePath: true, // 넓은 경로
   });
 
-  const handleSearch = () => {
+  const handleSearch = async () => {
     if (!departure || !destination) return;
 
-    // TODO: 실제 API 호출 시 options를 파라미터로 전달
+    // Mock 데이터 (임시)
     const mockRoutes: Route[] = [
       {
-        id: 'pregnant-1',
+        id: 'physical-1',
         departure,
         destination,
         duration: '30분',
         distance: '2.5km',
-        description: '💜 경사 3% 미만 | 휴게 벤치 多 | 엘리베이터 이용',
+        description: '♿ 엘리베이터 3회 | 모든 구간 경사 5% 미만 | 휴게 쉼터 2곳',
       },
       {
-        id: 'pregnant-2',
+        id: 'physical-2',
         departure,
         destination,
-        duration: '26분',
+        duration: '27분',
         distance: '2.2km',
-        description: '💜 평탄한 경로 | 쉼터 4곳 | 의료시설 근처',
+        description: '♿ 휠체어 리프트 1회 | 넓은 보행로 | 장애인 화장실',
       },
       {
-        id: 'pregnant-3',
+        id: 'physical-3',
         departure,
         destination,
         duration: '35분',
         distance: '2.8km',
-        description: '💜 완전 평지 | 그늘진 경로 | 화장실 多',
+        description: '♿ 모든 문 자동문 | 턱 없는 경로 | 대중교통 환승 용이',
       },
     ];
 
@@ -95,12 +95,12 @@ export function PregnantRouteSearchPage({ onRouteSelect, addToFavorites = false 
           </Button>
           <div className="flex items-center gap-3">
             <div className="p-2 bg-purple-600 rounded-lg">
-              <Heart className="w-6 h-6 text-white" />
+              <Accessibility className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="mb-1">임산부 경로검색</h1>
+              <h1 className="mb-1">지체장애인 경로검색</h1>
               <p className="text-sm text-muted-foreground">
-                안전하고 편안하게 이동할 수 있는 경로를 찾아드립니다
+                보행 및 이동 편의를 고려한 최적 경로를 찾아드립니다
               </p>
             </div>
           </div>
@@ -112,26 +112,17 @@ export function PregnantRouteSearchPage({ onRouteSelect, addToFavorites = false 
           <div className="space-y-3">
             <div className="flex items-center space-x-2">
               <Checkbox
-                id="gentleSlope"
-                checked={options.gentleSlope}
+                id="useElevator"
+                checked={options.useElevator}
                 onCheckedChange={(checked) =>
-                  setOptions({ ...options, gentleSlope: checked as boolean })
+                  setOptions({ ...options, useElevator: checked as boolean })
                 }
               />
-              <Label htmlFor="gentleSlope" className="cursor-pointer">
-                완만한 경사 (급경사 회피)
-              </Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="restArea"
-                checked={options.restArea}
-                onCheckedChange={(checked) =>
-                  setOptions({ ...options, restArea: checked as boolean })
-                }
-              />
-              <Label htmlFor="restArea" className="cursor-pointer">
-                휴게 공간 포함 (자주 쉴 수 있는 경로)
+              <Label
+                htmlFor="useElevator"
+                className="cursor-pointer"
+              >
+                엘리베이터 이용
               </Label>
             </div>
             <div className="flex items-center space-x-2">
@@ -142,20 +133,41 @@ export function PregnantRouteSearchPage({ onRouteSelect, addToFavorites = false 
                   setOptions({ ...options, avoidStairs: checked as boolean })
                 }
               />
-              <Label htmlFor="avoidStairs" className="cursor-pointer">
-                계단 구간 회피 (엘리베이터 우선)
+              <Label
+                htmlFor="avoidStairs"
+                className="cursor-pointer"
+              >
+                계단 회피
               </Label>
             </div>
             <div className="flex items-center space-x-2">
               <Checkbox
-                id="medicalNearby"
-                checked={options.medicalNearby}
+                id="gentleSlope"
+                checked={options.gentleSlope}
                 onCheckedChange={(checked) =>
-                  setOptions({ ...options, medicalNearby: checked as boolean })
+                  setOptions({ ...options, gentleSlope: checked as boolean })
                 }
               />
-              <Label htmlFor="medicalNearby" className="cursor-pointer">
-                의료시설 인접 경로 우선
+              <Label
+                htmlFor="gentleSlope"
+                className="cursor-pointer"
+              >
+                완만한 경사 우선
+              </Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="widePath"
+                checked={options.widePath}
+                onCheckedChange={(checked) =>
+                  setOptions({ ...options, widePath: checked as boolean })
+                }
+              />
+              <Label
+                htmlFor="widePath"
+                className="cursor-pointer"
+              >
+                넓은 경로 우선
               </Label>
             </div>
           </div>
@@ -186,8 +198,8 @@ export function PregnantRouteSearchPage({ onRouteSelect, addToFavorites = false 
                 onFocus={() => speak('도착지 입력란')}
               />
             </div>
-            <Button 
-              className="w-full" 
+            <Button
+              className="w-full"
               onClick={handleSearch}
               disabled={!departure || !destination}
               onMouseEnter={() => speak('경로 검색 버튼')}
@@ -240,7 +252,7 @@ export function PregnantRouteSearchPage({ onRouteSelect, addToFavorites = false 
         {searched && routes.length === 0 && (
           <Card className="p-8 text-center bg-card">
             <p className="text-muted-foreground">
-              검색 결과가 없습니���. 다른 출발지나 도착지를 입력해주세요.
+              검색 결과가 없습니다. 다른 출발지나 도착지를 입력해주세요.
             </p>
           </Card>
         )}

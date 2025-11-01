@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Accessibility, BadgeHelp, Users, Heart, Eye } from 'lucide-react';
+import { ArrowLeft, Accessibility, Users, Eye, Ear } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { useHighContrast } from '../contexts/HighContrastContext';
@@ -17,49 +17,40 @@ export function UserTypeSelectionPage() {
 
   const userTypes = [
     {
-      id: 'wheelchair',
-      title: '휠체어 이용자',
-      description: '휠체어로 이동 가능한 경로를 찾아드립니다',
+      id: 'physical-disability',
+      title: '지체장애인',
+      description: '휠체어, 보행 보조기구 이용자를 위한 경로',
       icon: Accessibility,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50',
-      route: '/route-search/wheelchair',
+      color: 'text-purple-600',
+      bgColor: 'bg-purple-50',
+      route: '/route-search/physical-disability',
     },
     {
-      id: 'infant',
-      title: '영유아 동반자',
-      description: '유모차와 함께 이동 가능한 경로를 찾아드립니다',
-      icon: BadgeHelp,
-      color: 'text-pink-600',
-      bgColor: 'bg-pink-50',
-      route: '/route-search/infant',
+      id: 'auditory',
+      title: '청각장애인',
+      description: '시각적 안내 및 정보를 제공하는 경로',
+      icon: Ear,
+      color: 'text-blue-600',
+      bgColor: 'bg-blue-50',
+      route: '/route-search/auditory',
+    },
+    {
+      id: 'visual',
+      title: '시각장애인',
+      description: '음성 안내 및 점자블록 정보가 제공되는 경로',
+      icon: Eye,
+      color: 'text-orange-600',
+      bgColor: 'bg-orange-50',
+      route: '/route-search/visual',
     },
     {
       id: 'elderly',
       title: '고령자',
-      description: '계단이 적고 휴게시설이 있는 경로를 찾아드립니다',
+      description: '계단이 적고, 휴식 공간이 많은 편안한 경로',
       icon: Users,
       color: 'text-green-600',
       bgColor: 'bg-green-50',
       route: '/route-search/elderly',
-    },
-    {
-      id: 'pregnant',
-      title: '임산부',
-      description: '경사가 완만하고 안전한 경로를 찾아드립니다',
-      icon: Heart,
-      color: 'text-purple-600',
-      bgColor: 'bg-purple-50',
-      route: '/route-search/pregnant',
-    },
-    {
-      id: 'low-vision',
-      title: '저시력자',
-      description: '점자블록과 음성안내가 있는 경로를 찾아드립니다',
-      icon: Eye,
-      color: 'text-orange-600',
-      bgColor: 'bg-orange-50',
-      route: '/route-search/low-vision',
     },
   ];
 

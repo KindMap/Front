@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowRight, ArrowLeft, Check, Accessibility } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Check, Ear } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Card } from './ui/card';
@@ -9,17 +9,17 @@ import { Checkbox } from './ui/checkbox';
 import { Label } from './ui/label';
 import { useVoiceGuide } from '../contexts/VoiceGuideContext';
 
-interface WheelchairRouteSearchPageProps {
+interface AuditoryRouteSearchPageProps {
   onRouteSelect?: (route: Route) => void;
   addToFavorites?: boolean;
 }
 
 /**
- * 휠체어 이용자를 위한 경로검색 페이지
- * 
- * 휠체어 접근성을 고려한 맞춤형 경로를 제공합니다.
+ * 청각장애인을 위한 경로검색 페이지
+ *
+ * 시각적 안내 및 명확한 정보 전달에 중점을 둔 경로를 제공합니다.
  */
-export function WheelchairRouteSearchPage({ onRouteSelect, addToFavorites = false }: WheelchairRouteSearchPageProps) {
+export function AuditoryRouteSearchPage({ onRouteSelect, addToFavorites = false }: AuditoryRouteSearchPageProps) {
   const navigate = useNavigate();
   const { speak } = useVoiceGuide();
   const [departure, setDeparture] = useState('');
@@ -27,116 +27,42 @@ export function WheelchairRouteSearchPage({ onRouteSelect, addToFavorites = fals
   const [routes, setRoutes] = useState<Route[]>([]);
   const [searched, setSearched] = useState(false);
   
-  // 휠체어 이용자 맞춤 옵션
+  // 청각장애인 맞춤 옵션
   const [options, setOptions] = useState({
-    elevatorOnly: true, // 엘리베이터만 이용
-    avoidStairs: true, // 계단 회피
-    flatRoute: true, // 평탄한 경로 우선
-    widePathway: true, // 넓은 통로 우선
+    visualAlerts: true, // 시각적 알림 (예: 횡단보도 깜빡임)
+    textInstructions: true, // 텍스트 기반 길 안내
+    lowNoise: true, // 조용한 경로 우선
+    emergencyText: true, // 긴급 상황 텍스트 지원
   });
 
-  const handleSearch = async () => {
+  const handleSearch = () => {
     if (!departure || !destination) return;
 
-    /**
-     * 실제 API 연동 예시:
-     * 
-     * 1. routeApi.ts의 searchRoutes 함수 사용
-     * 2. 사용자 유형(wheelchair)과 선택한 옵션들을 파라미터로 전달
-     * 3. 응답 데이터를 state에 저장
-     * 4. 에러 처리 및 로딩 상태 관리
-     * 
-     * try {
-     *   setIsLoading(true);
-     *   setError(null);
-     *   
-     *   const results = await searchRoutes(departure, destination, {
-     *     userType: UserType.WHEELCHAIR,
-     *     elevatorOnly: options.elevatorOnly,
-     *     avoidStairs: options.avoidStairs,
-     *     flatRoute: options.flatRoute,
-     *     widePathway: options.widePathway,
-     *   });
-     *   
-     *   setRoutes(results);
-     *   setSearched(true);
-     *   
-     *   // 검색 기록 저장
-     *   saveSearchHistory({
-     *     departure,
-     *     destination,
-     *     userType: UserType.WHEELCHAIR,
-     *     timestamp: new Date(),
-     *   });
-     *   
-     * } catch (error) {
-     *   console.error('경로 검색 실패:', error);
-     *   setError('경로를 찾을 수 없습니다. 다시 시도해주세요.');
-     *   
-     *   // 에러 토스트 표시
-     *   toast.error('경로 검색에 실패했습니다.', {
-     *     description: error.message,
-     *   });
-     *   
-     * } finally {
-     *   setIsLoading(false);
-     * }
-     * 
-     * 
-     * API 응답 데이터 구조:
-     * [
-     *   {
-     *     id: 'route-uuid-123',
-     *     departure: '서울역',
-     *     destination: '강남역',
-     *     duration: '28분',
-     *     distance: '3.0km',
-     *     description: '엘리베이터 4회 이용 | 평탄한 도로',
-     *     coordinates: [
-     *       { latitude: 37.5547, longitude: 126.9707 },
-     *       { latitude: 37.5548, longitude: 126.9708 },
-     *       ...
-     *     ],
-     *     obstacles: ['obstacle-id-1', 'obstacle-id-2'],
-     *     facilities: ['facility-id-1', 'facility-id-2'],
-     *     elevators: 4,
-     *     stairs: 0,
-     *     slope: { average: 2.5, maximum: 4.8 },
-     *     accessibility: {
-     *       wheelchairFriendly: true,
-     *       hasElevator: true,
-     *       hasRamp: true,
-     *       pathWidth: 1.5
-     *     }
-     *   }
-     * ]
-     */
-
-    // Mock 데이터 (임시)
+    // TODO: 실제 API 호출 시 options를 파라미터로 전달
     const mockRoutes: Route[] = [
       {
-        id: 'wheelchair-1',
+        id: 'auditory-1',
         departure,
         destination,
-        duration: '28분',
-        distance: '3.0km',
-        description: '🛗 엘리베이터 4회 이용 | 평탄한 도로 | 휠체어 전용 램프',
+        duration: '30분',
+        distance: '2.1km',
+        description: '📊 텍스트 안내 제공 | 횡단보도 시각 알림 | 공사 구간 적음',
       },
       {
-        id: 'wheelchair-2',
+        id: 'auditory-2',
         departure,
         destination,
-        duration: '32분',
-        distance: '3.3km',
-        description: '🛗 엘리베이터 3회 이용 | 경사 5% 미만 | 자동문 설치',
+        duration: '25분',
+        distance: '1.8km',
+        description: '📊 조용한 공원길 포함 | 주요 지점 사진 안내',
       },
       {
-        id: 'wheelchair-3',
+        id: 'auditory-3',
         departure,
         destination,
         duration: '35분',
-        distance: '3.8km',
-        description: '🛗 엘리베이터 6회 이용 | 완전 평지 | 장애인 화장실 多',
+        distance: '2.5km',
+        description: '📊 전광판 많은 경로 | 상가 밀집 지역',
       },
     ];
 
@@ -169,12 +95,12 @@ export function WheelchairRouteSearchPage({ onRouteSelect, addToFavorites = fals
           </Button>
           <div className="flex items-center gap-3">
             <div className="p-2 bg-blue-600 rounded-lg">
-              <Accessibility className="w-6 h-6 text-white" />
+              <Ear className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="mb-1">휠체어 이용자 경로검색</h1>
+              <h1 className="mb-1">청각장애인 경로검색</h1>
               <p className="text-sm text-muted-foreground">
-                휠체어 접근 가능한 최적 경로를 찾아드립니다
+                시각적 안내를 통해 안전하게 이동할 수 있는 경로를 찾아드립니다
               </p>
             </div>
           </div>
@@ -186,66 +112,50 @@ export function WheelchairRouteSearchPage({ onRouteSelect, addToFavorites = fals
           <div className="space-y-3">
             <div className="flex items-center space-x-2">
               <Checkbox
-                id="elevatorOnly"
-                checked={options.elevatorOnly}
+                id="visualAlerts"
+                checked={options.visualAlerts}
                 onCheckedChange={(checked) =>
-                  setOptions({ ...options, elevatorOnly: checked as boolean })
+                  setOptions({ ...options, visualAlerts: checked as boolean })
                 }
               />
-              <Label 
-                htmlFor="elevatorOnly" 
-                className="cursor-pointer"
-                onMouseEnter={() => speak('엘리베이터만 이용')}
-              >
-                엘리베이터만 이용 (계단 이용 안 함)
+              <Label htmlFor="visualAlerts" className="cursor-pointer">
+                시각적 알림 제공 (횡단보도 등)
               </Label>
             </div>
             <div className="flex items-center space-x-2">
               <Checkbox
-                id="avoidStairs"
-                checked={options.avoidStairs}
+                id="textInstructions"
+                checked={options.textInstructions}
                 onCheckedChange={(checked) =>
-                  setOptions({ ...options, avoidStairs: checked as boolean })
+                  setOptions({ ...options, textInstructions: checked as boolean })
                 }
               />
-              <Label 
-                htmlFor="avoidStairs" 
-                className="cursor-pointer"
-                onMouseEnter={() => speak('계단 구간 회피')}
-              >
-                계단 구간 회피
+              <Label htmlFor="textInstructions" className="cursor-pointer">
+                텍스트 기반 길 안내
               </Label>
             </div>
             <div className="flex items-center space-x-2">
               <Checkbox
-                id="flatRoute"
-                checked={options.flatRoute}
+                id="lowNoise"
+                checked={options.lowNoise}
                 onCheckedChange={(checked) =>
-                  setOptions({ ...options, flatRoute: checked as boolean })
+                  setOptions({ ...options, lowNoise: checked as boolean })
                 }
               />
-              <Label 
-                htmlFor="flatRoute" 
-                className="cursor-pointer"
-                onMouseEnter={() => speak('평탄한 경로 우선')}
-              >
-                평탄한 경로 우선
+              <Label htmlFor="lowNoise" className="cursor-pointer">
+                조용한 경로 우선
               </Label>
             </div>
             <div className="flex items-center space-x-2">
               <Checkbox
-                id="widePathway"
-                checked={options.widePathway}
+                id="emergencyText"
+                checked={options.emergencyText}
                 onCheckedChange={(checked) =>
-                  setOptions({ ...options, widePathway: checked as boolean })
+                  setOptions({ ...options, emergencyText: checked as boolean })
                 }
               />
-              <Label 
-                htmlFor="widePathway" 
-                className="cursor-pointer"
-                onMouseEnter={() => speak('넓은 통로 우선')}
-              >
-                넓은 통로 우선 (휠체어 회전 가능)
+              <Label htmlFor="emergencyText" className="cursor-pointer">
+                긴급 상황 텍스트 지원
               </Label>
             </div>
           </div>
