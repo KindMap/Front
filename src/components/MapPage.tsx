@@ -50,7 +50,7 @@ export function MapPage({ selectedRoute }: MapPageProps) {
   const [zoomLevel, setZoomLevel] = useState(100);
   const [mapKey, setMapKey] = useState(0);
   const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number } | null>(null);
-  const [directionsResponse, setDirectionsResponse] = useState<google.maps.DirectionsResult | null>(null);
+  const [directionsResponse, setDirectionsResponse] = useState<google.maps.DirectionsResult[]>([]);
   
   const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -142,27 +142,47 @@ export function MapPage({ selectedRoute }: MapPageProps) {
 
   // selectedRoute가 변경될 때 경로 표시
   useEffect(() => {
-    if (selectedRoute && typeof google !== 'undefined' && google.maps) {
-      if (selectedRoute.departure && selectedRoute.destination) {
-        const directionsService = new google.maps.DirectionsService();
+    if (selectedRoute?.path && selectedRoute.path.length >= 2 && typeof google !== 'undefined' && google.maps) {
+      const directionsService = new google.maps.DirectionsService();
+      const routePath = selectedRoute.path;
+      
+      const promises = [];
+      for (let i = 0; i < routePath.length - 1; i++) {
+        const request = {
+          origin: `${routePath[i]}역`,
+          destination: `${routePath[i + 1]}역`,
+          travelMode: google.maps.TravelMode.TRANSIT,
+        };
         
-        directionsService.route(
-          {
-            origin: selectedRoute.departure,
-            destination: selectedRoute.destination,
-            travelMode: google.maps.TravelMode.TRANSIT,
-          },
-          (result, status) => {
-            if (status === google.maps.DirectionsStatus.OK && result) {
-              setDirectionsResponse(result);
+        promises.push(new Promise((resolve, reject) => {
+          directionsService.route(request, (result, status) => {
+            if (status === google.maps.DirectionsStatus.OK) {
+              resolve(result);
             } else {
-              console.error('경로 계산 실패:', status);
+              reject(status);
             }
-          }
-        );
+          });
+        }));
       }
+
+      Promise.all(promises)
+        .then(results => {
+          setDirectionsResponse(results as google.maps.DirectionsResult[]);
+
+          // Center map on the very first point
+          const firstResult = results[0] as google.maps.DirectionsResult;
+          if (firstResult?.routes[0]?.legs[0]?.start_location) {
+            const startLocation = firstResult.routes[0].legs[0].start_location;
+            setMapCenter({ lat: startLocation.lat(), lng: startLocation.lng() });
+          }
+        })
+        .catch(status => {
+          console.error("하나 이상의 경로 계산에 실패했습니다:", status);
+          setDirectionsResponse([]);
+        });
+
     } else {
-      setDirectionsResponse(null);
+      setDirectionsResponse([]);
     }
   }, [selectedRoute]);
 

@@ -5,9 +5,9 @@ import { Input } from './ui/input';
 import { Card } from './ui/card';
 import { useNavigate } from 'react-router-dom';
 import { Route } from '../types';
-import { Checkbox } from './ui/checkbox';
 import { Label } from './ui/label';
 import { useVoiceGuide } from '../contexts/VoiceGuideContext';
+import { searchRoutes } from '../services/routeApi';
 
 interface ElderlyRouteSearchPageProps {
   onRouteSelect?: (route: Route) => void;
@@ -26,48 +26,35 @@ export function ElderlyRouteSearchPage({ onRouteSelect, addToFavorites = false }
   const [destination, setDestination] = useState('');
   const [routes, setRoutes] = useState<Route[]>([]);
   const [searched, setSearched] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  // 고령자 맞춤 옵션
-  const [options, setOptions] = useState({
-    avoidStairs: true, // 계단 회피
-    restStops: true, // 휴식 장소 포함
-    gentleSlope: true, // 완만한 경사 우선
-    wellLit: true, // 밝은 경로
-  });
-
-  const handleSearch = () => {
+  const handleSearch = async () => {
     if (!departure || !destination) return;
-
-    // TODO: 실제 API 호출 시 options를 파라미터로 전달
-    const mockRoutes: Route[] = [
-      {
-        id: 'elderly-1',
-        departure,
-        destination,
-        duration: '32분',
-        distance: '2.3km',
-        description: '👴 휴게 벤치 5곳 | 계단 없음 | 횡단보도 신호 충분',
-      },
-      {
-        id: 'elderly-2',
-        departure,
-        destination,
-        duration: '28분',
-        distance: '2.0km',
-        description: '👴 쉼터 3곳 | 경사 완만 | 그늘진 경로',
-      },
-      {
-        id: 'elderly-3',
-        departure,
-        destination,
-        duration: '38분',
-        distance: '2.7km',
-        description: '👴 휴게소 多 | 엘리베이터 이용 | 의료시설 인접',
-      },
-    ];
-
-    setRoutes(mockRoutes);
-    setSearched(true);
+    setLoading(true);
+    setSearched(false);
+    try {
+      const results = await searchRoutes(departure, destination, "ELD");
+      console.log('API Response:', results);
+      const formattedRoutes = results.routes.map((result: any) => {
+        const score = Math.floor(result.score * 100);
+        return {
+          id: result.rank.toString(),
+          departure,
+          destination,
+          duration: `${result.arrival_time}분`,
+          distance: `${(result.walking_distance / 1000).toFixed(2)}km`,
+          description: `점수: ${score}점 | ${result.lines.join(' → ')} | 환승 ${result.transfers}회`,
+          path: result.route,
+        };
+      });
+      setRoutes(formattedRoutes);
+    } catch (error) {
+      console.error("Failed to fetch routes:", error);
+      setRoutes([]);
+    } finally {
+      setLoading(false);
+      setSearched(true);
+    }
   };
 
   const handleSelectRoute = (route: Route) => {
@@ -105,61 +92,6 @@ export function ElderlyRouteSearchPage({ onRouteSelect, addToFavorites = false }
             </div>
           </div>
         </div>
-
-        {/* 검색 옵션 */}
-        <Card className="p-4 mb-4 bg-card shadow-md">
-          <h3 className="mb-3">경로 옵션</h3>
-          <div className="space-y-3">
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="avoidStairs"
-                checked={options.avoidStairs}
-                onCheckedChange={(checked) =>
-                  setOptions({ ...options, avoidStairs: checked as boolean })
-                }
-              />
-              <Label htmlFor="avoidStairs" className="cursor-pointer">
-                계단 회피
-              </Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="restStops"
-                checked={options.restStops}
-                onCheckedChange={(checked) =>
-                  setOptions({ ...options, restStops: checked as boolean })
-                }
-              />
-              <Label htmlFor="restStops" className="cursor-pointer">
-                휴식 장소 포함 (벤치, 쉼터)
-              </Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="gentleSlope"
-                checked={options.gentleSlope}
-                onCheckedChange={(checked) =>
-                  setOptions({ ...options, gentleSlope: checked as boolean })
-                }
-              />
-              <Label htmlFor="gentleSlope" className="cursor-pointer">
-                완만한 경사 우선
-              </Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="wellLit"
-                checked={options.wellLit}
-                onCheckedChange={(checked) =>
-                  setOptions({ ...options, wellLit: checked as boolean })
-                }
-              />
-              <Label htmlFor="wellLit" className="cursor-pointer">
-                밝은 경로 우선
-              </Label>
-            </div>
-          </div>
-        </Card>
 
         {/* 검색 입력 */}
         <Card className="p-4 mb-4 bg-card shadow-md">

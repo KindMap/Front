@@ -5,9 +5,9 @@ import { Input } from './ui/input';
 import { Card } from './ui/card';
 import { useNavigate } from 'react-router-dom';
 import { Route } from '../types';
-import { Checkbox } from './ui/checkbox';
 import { Label } from './ui/label';
 import { useVoiceGuide } from '../contexts/VoiceGuideContext';
+import { searchRoutes } from '../services/routeApi';
 
 interface VisualRouteSearchPageProps {
   onRouteSelect?: (route: Route) => void;
@@ -26,48 +26,35 @@ export function VisualRouteSearchPage({ onRouteSelect, addToFavorites = false }:
   const [destination, setDestination] = useState('');
   const [routes, setRoutes] = useState<Route[]>([]);
   const [searched, setSearched] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  // 시각장애인 맞춤 옵션
-  const [options, setOptions] = useState({
-    brailleBlocks: true, // 점자블록 경로
-    audioSignals: true, // 음향 신호기
-    tactilePaving: true, // 촉각 보도블록
-    voiceGuidance: true, // 음성 안내
-  });
-
-  const handleSearch = () => {
+  const handleSearch = async () => {
     if (!departure || !destination) return;
-
-    // TODO: 실제 API 호출 시 options를 파라미터로 전달
-    const mockRoutes: Route[] = [
-      {
-        id: 'visual-1',
-        departure,
-        destination,
-        duration: '25분',
-        distance: '1.9km',
-        description: '🔊 점자블록 완비 | 음향 신호기 12개 | 연속된 촉각 보도',
-      },
-      {
-        id: 'visual-2',
-        departure,
-        destination,
-        duration: '30분',
-        distance: '2.2km',
-        description: '🔊 주요 길목 음성 안내 | 장애물 적은 경로',
-      },
-      {
-        id: 'visual-3',
-        departure,
-        destination,
-        duration: '28분',
-        distance: '2.0km',
-        description: '🔊 지하철역 연계 | 점자 안내판 구비',
-      },
-    ];
-
-    setRoutes(mockRoutes);
-    setSearched(true);
+    setLoading(true);
+    setSearched(false);
+    try {
+      const results = await searchRoutes(departure, destination, "VIS");
+      console.log('API Response:', results);
+      const formattedRoutes = results.routes.map((result: any) => {
+        const score = Math.floor(result.score * 100);
+        return {
+          id: result.rank.toString(),
+          departure,
+          destination,
+          duration: `${result.arrival_time}분`,
+          distance: `${(result.walking_distance / 1000).toFixed(2)}km`,
+          description: `점수: ${score}점 | ${result.lines.join(' → ')} | 환승 ${result.transfers}회`,
+          path: result.route,
+        };
+      });
+      setRoutes(formattedRoutes);
+    } catch (error) {
+      console.error("Failed to fetch routes:", error);
+      setRoutes([]);
+    } finally {
+      setLoading(false);
+      setSearched(true);
+    }
   };
 
   const handleSelectRoute = (route: Route) => {
@@ -105,61 +92,6 @@ export function VisualRouteSearchPage({ onRouteSelect, addToFavorites = false }:
             </div>
           </div>
         </div>
-
-        {/* 검색 옵션 */}
-        <Card className="p-4 mb-4 bg-card shadow-md">
-          <h3 className="mb-3">경로 옵션</h3>
-          <div className="space-y-3">
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="brailleBlocks"
-                checked={options.brailleBlocks}
-                onCheckedChange={(checked) =>
-                  setOptions({ ...options, brailleBlocks: checked as boolean })
-                }
-              />
-              <Label htmlFor="brailleBlocks" className="cursor-pointer">
-                점자블록 경로 우선
-              </Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="audioSignals"
-                checked={options.audioSignals}
-                onCheckedChange={(checked) =>
-                  setOptions({ ...options, audioSignals: checked as boolean })
-                }
-              />
-              <Label htmlFor="audioSignals" className="cursor-pointer">
-                음향 신호기 포함
-              </Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="tactilePaving"
-                checked={options.tactilePaving}
-                onCheckedChange={(checked) =>
-                  setOptions({ ...options, tactilePaving: checked as boolean })
-                }
-              />
-              <Label htmlFor="tactilePaving" className="cursor-pointer">
-                촉각 보도블록 경로
-              </Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="voiceGuidance"
-                checked={options.voiceGuidance}
-                onCheckedChange={(checked) =>
-                  setOptions({ ...options, voiceGuidance: checked as boolean })
-                }
-              />
-              <Label htmlFor="voiceGuidance" className="cursor-pointer">
-                음성 안내 지원
-              </Label>
-            </div>
-          </div>
-        </Card>
 
         {/* 검색 입력 */}
         <Card className="p-4 mb-4 bg-card shadow-md">

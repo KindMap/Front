@@ -5,9 +5,9 @@ import { Input } from './ui/input';
 import { Card } from './ui/card';
 import { useNavigate } from 'react-router-dom';
 import { Route } from '../types';
-import { Checkbox } from './ui/checkbox';
 import { Label } from './ui/label';
 import { useVoiceGuide } from '../contexts/VoiceGuideContext';
+import { searchRoutes } from '../services/routeApi';
 
 interface AuditoryRouteSearchPageProps {
   onRouteSelect?: (route: Route) => void;
@@ -26,48 +26,35 @@ export function AuditoryRouteSearchPage({ onRouteSelect, addToFavorites = false 
   const [destination, setDestination] = useState('');
   const [routes, setRoutes] = useState<Route[]>([]);
   const [searched, setSearched] = useState(false);
-  
-  // 청각장애인 맞춤 옵션
-  const [options, setOptions] = useState({
-    visualAlerts: true, // 시각적 알림 (예: 횡단보도 깜빡임)
-    textInstructions: true, // 텍스트 기반 길 안내
-    lowNoise: true, // 조용한 경로 우선
-    emergencyText: true, // 긴급 상황 텍스트 지원
-  });
+  const [loading, setLoading] = useState(false);
 
-  const handleSearch = () => {
+  const handleSearch = async () => {
     if (!departure || !destination) return;
-
-    // TODO: 실제 API 호출 시 options를 파라미터로 전달
-    const mockRoutes: Route[] = [
-      {
-        id: 'auditory-1',
-        departure,
-        destination,
-        duration: '30분',
-        distance: '2.1km',
-        description: '📊 텍스트 안내 제공 | 횡단보도 시각 알림 | 공사 구간 적음',
-      },
-      {
-        id: 'auditory-2',
-        departure,
-        destination,
-        duration: '25분',
-        distance: '1.8km',
-        description: '📊 조용한 공원길 포함 | 주요 지점 사진 안내',
-      },
-      {
-        id: 'auditory-3',
-        departure,
-        destination,
-        duration: '35분',
-        distance: '2.5km',
-        description: '📊 전광판 많은 경로 | 상가 밀집 지역',
-      },
-    ];
-
-    setRoutes(mockRoutes);
-    setSearched(true);
+    setLoading(true);
+    setSearched(false);
+    try {
+      const results = await searchRoutes(departure, destination, "AUD");
+      console.log('API Response:', results);
+      const formattedRoutes = results.routes.map((result: any) => {
+        const score = Math.floor(result.score * 100);
+        return {
+          id: result.rank.toString(),
+          departure,
+          destination,
+          duration: `${result.arrival_time}분`,
+          distance: `${(result.walking_distance / 1000).toFixed(2)}km`,
+          description: `점수: ${score}점 | ${result.lines.join(' → ')} | 환승 ${result.transfers}회`,
+          path: result.route,
+        };
+      });
+      setRoutes(formattedRoutes);
+    } catch (error) {
+      console.error("Failed to fetch routes:", error);
+      setRoutes([]);
+    } finally {
+      setLoading(false);
+      setSearched(true);
+    }
   };
 
   const handleSelectRoute = (route: Route) => {
@@ -105,61 +92,6 @@ export function AuditoryRouteSearchPage({ onRouteSelect, addToFavorites = false 
             </div>
           </div>
         </div>
-
-        {/* 검색 옵션 */}
-        <Card className="p-4 mb-4 bg-card shadow-md">
-          <h3 className="mb-3">경로 옵션</h3>
-          <div className="space-y-3">
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="visualAlerts"
-                checked={options.visualAlerts}
-                onCheckedChange={(checked) =>
-                  setOptions({ ...options, visualAlerts: checked as boolean })
-                }
-              />
-              <Label htmlFor="visualAlerts" className="cursor-pointer">
-                시각적 알림 제공 (횡단보도 등)
-              </Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="textInstructions"
-                checked={options.textInstructions}
-                onCheckedChange={(checked) =>
-                  setOptions({ ...options, textInstructions: checked as boolean })
-                }
-              />
-              <Label htmlFor="textInstructions" className="cursor-pointer">
-                텍스트 기반 길 안내
-              </Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="lowNoise"
-                checked={options.lowNoise}
-                onCheckedChange={(checked) =>
-                  setOptions({ ...options, lowNoise: checked as boolean })
-                }
-              />
-              <Label htmlFor="lowNoise" className="cursor-pointer">
-                조용한 경로 우선
-              </Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="emergencyText"
-                checked={options.emergencyText}
-                onCheckedChange={(checked) =>
-                  setOptions({ ...options, emergencyText: checked as boolean })
-                }
-              />
-              <Label htmlFor="emergencyText" className="cursor-pointer">
-                긴급 상황 텍스트 지원
-              </Label>
-            </div>
-          </div>
-        </Card>
 
         {/* 검색 입력 */}
         <Card className="p-4 mb-4 bg-card shadow-md">

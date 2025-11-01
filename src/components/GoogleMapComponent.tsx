@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { GoogleMap, Marker, DirectionsRenderer } from '@react-google-maps/api';
+import { GoogleMap, Marker, Polyline } from '@react-google-maps/api';
 import { Facility, Obstacle } from '../types';
 import { useHighContrast } from '../contexts/HighContrastContext';
 
@@ -8,7 +8,7 @@ interface GoogleMapComponentProps {
   showObstacles?: boolean;
   facilities?: Facility[];
   obstacles?: Obstacle[];
-  directionsResponse?: google.maps.DirectionsResult | null;
+  directionsResponse?: google.maps.DirectionsResult[] | null;
   zoomLevel?: number;
   center?: { lat: number; lng: number } | null;
   onCenterChange?: (center: { lat: number; lng: number }) => void;
@@ -148,20 +148,17 @@ export function GoogleMapComponent({
             }
           }
         },
-        (error) => {
-          // 위치 정보를 가져올 수 없을 때 기본 위치(서울) 사용
-          // 사용자가 위치 권한을 거부했거나 브라우저에서 지원하지 않는 경우
+        () => {
           setCurrentLocation(defaultCenter);
           setMapCenter(defaultCenter);
         },
         {
-          enableHighAccuracy: false, // 배터리 소모를 줄이기 위해 false로 변경
-          timeout: 10000, // 타임아웃을 10초로 증가
-          maximumAge: 300000, // 5분간 캐시된 위치 정보 사용 가능
+          enableHighAccuracy: false,
+          timeout: 10000,
+          maximumAge: 300000,
         }
       );
     } else {
-      // 브라우저가 geolocation을 지원하지 않는 경우
       setCurrentLocation(defaultCenter);
       setMapCenter(defaultCenter);
     }
@@ -210,7 +207,6 @@ export function GoogleMapComponent({
         styles: isHighContrast ? highContrastMapStyles : [],
       }}
     >
-      {/* 현재 위치 마커 */}
       {currentLocation && (
         <Marker
           position={currentLocation}
@@ -226,30 +222,41 @@ export function GoogleMapComponent({
         />
       )}
 
-      {/* 경로 표시 */}
-      {directionsResponse && (
-        <DirectionsRenderer
-          directions={directionsResponse}
-          options={{
-            suppressMarkers: false,
-            polylineOptions: {
-              strokeColor: isHighContrast ? '#ffff00' : '#2563eb',
-              strokeWeight: isHighContrast ? 6 : 5,
-              strokeOpacity: 1,
-            },
-            markerOptions: {
-              icon: isHighContrast ? {
-                path: google.maps.SymbolPath.CIRCLE,
-                scale: 10,
-                fillColor: '#ffff00',
-                fillOpacity: 1,
-                strokeColor: '#2b2b2b',
-                strokeWeight: 3,
-              } : undefined,
-            },
-          }}
-        />
-      )}
+      {directionsResponse && directionsResponse.map((response, responseIndex) => (
+        <div key={responseIndex}>
+          {response.routes[0] && (
+            <>
+              {response.routes[0].legs.map((leg, legIndex) => 
+                leg.steps.map((step, stepIndex) => {
+                  const key = `${responseIndex}-${legIndex}-${stepIndex}`;
+                  let strokeColor = isHighContrast ? '#ffff00' : '#2563eb'; // Default color
+
+                  if (step.travel_mode === 'WALKING') {
+                    strokeColor = '#808080'; // Gray for walking
+                  } else if (step.travel_mode === 'TRANSIT' && step.transit) {
+                    strokeColor = step.transit.line.color || strokeColor;
+                  }
+
+                  return (
+                    <Polyline
+                      key={key}
+                      path={step.path}
+                      options={{
+                        strokeColor,
+                        strokeWeight: isHighContrast ? 8 : 6,
+                        strokeOpacity: 0.8,
+                      }}
+                    />
+                  );
+                })
+              )}
+              {/* Render markers for the start of the first segment and the end of the last segment */}
+              {responseIndex === 0 && <Marker position={response.routes[0].legs[0].start_location} label="A" />}
+              {responseIndex === directionsResponse.length - 1 && <Marker position={response.routes[0].legs[response.routes[0].legs.length - 1].end_location} label="B" />}
+            </>
+          )}
+        </div>
+      ))}
     </GoogleMap>
   );
 }

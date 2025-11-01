@@ -6,6 +6,7 @@ export interface Route {
   distance: string;
   description: string;
   directionsResult?: google.maps.DirectionsResult;
+  path?: string[];
 }
 
 export interface Favorite extends Route {

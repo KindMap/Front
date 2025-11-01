@@ -5,9 +5,9 @@ import { Input } from './ui/input';
 import { Card } from './ui/card';
 import { useNavigate } from 'react-router-dom';
 import { Route } from '../types';
-import { Checkbox } from './ui/checkbox';
 import { Label } from './ui/label';
 import { useVoiceGuide } from '../contexts/VoiceGuideContext';
+import { searchRoutes } from '../services/routeApi';
 
 interface PhysicalDisabilityRouteSearchPageProps {
   onRouteSelect?: (route: Route) => void;
@@ -26,48 +26,40 @@ export function PhysicalDisabilityRouteSearchPage({ onRouteSelect, addToFavorite
   const [destination, setDestination] = useState('');
   const [routes, setRoutes] = useState<Route[]>([]);
   const [searched, setSearched] = useState(false);
-
-  // 지체장애인 맞춤 옵션
-  const [options, setOptions] = useState({
-    useElevator: true, // 엘리베이터 이용
-    avoidStairs: true, // 계단 회피
-    gentleSlope: true, // 완만한 경사
-    widePath: true, // 넓은 경로
-  });
+  const [loading, setLoading] = useState(false);
 
   const handleSearch = async () => {
     if (!departure || !destination) return;
+    setLoading(true);
+    setSearched(false);
+    try {
+      const results = await searchRoutes(departure, destination, "PHY");
+      console.log('API Response:', results); // Log the raw response
+      const formattedRoutes = results.routes.map((result: any) => {
+        const score = Math.floor(result.score * 100);
+        const durationMinutes = result.arrival_time; // Assuming arrival_time is in minutes
+        const durationString = `${durationMinutes}분`;
+        const distanceString = `${(result.walking_distance / 1000).toFixed(2)}km`; // Convert meters to km
+        const descriptionString = `점수: ${score}점 | ${result.lines.join(' → ')} | 환승 ${result.transfers}회`;
 
-    // Mock 데이터 (임시)
-    const mockRoutes: Route[] = [
-      {
-        id: 'physical-1',
-        departure,
-        destination,
-        duration: '30분',
-        distance: '2.5km',
-        description: '♿ 엘리베이터 3회 | 모든 구간 경사 5% 미만 | 휴게 쉼터 2곳',
-      },
-      {
-        id: 'physical-2',
-        departure,
-        destination,
-        duration: '27분',
-        distance: '2.2km',
-        description: '♿ 휠체어 리프트 1회 | 넓은 보행로 | 장애인 화장실',
-      },
-      {
-        id: 'physical-3',
-        departure,
-        destination,
-        duration: '35분',
-        distance: '2.8km',
-        description: '♿ 모든 문 자동문 | 턱 없는 경로 | 대중교통 환승 용이',
-      },
-    ];
-
-    setRoutes(mockRoutes);
-    setSearched(true);
+        return {
+          id: result.rank.toString(),
+          departure,
+          destination,
+          duration: durationString,
+          distance: distanceString,
+          description: descriptionString,
+          path: result.route, // This is the array of station names
+        };
+      });
+      setRoutes(formattedRoutes);
+    } catch (error) {
+      console.error("Failed to fetch routes:", error);
+      setRoutes([]);
+    } finally {
+      setLoading(false);
+      setSearched(true);
+    }
   };
 
   const handleSelectRoute = (route: Route) => {
@@ -105,73 +97,6 @@ export function PhysicalDisabilityRouteSearchPage({ onRouteSelect, addToFavorite
             </div>
           </div>
         </div>
-
-        {/* 검색 옵션 */}
-        <Card className="p-4 mb-4 bg-card shadow-md">
-          <h3 className="mb-3">경로 옵션</h3>
-          <div className="space-y-3">
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="useElevator"
-                checked={options.useElevator}
-                onCheckedChange={(checked) =>
-                  setOptions({ ...options, useElevator: checked as boolean })
-                }
-              />
-              <Label
-                htmlFor="useElevator"
-                className="cursor-pointer"
-              >
-                엘리베이터 이용
-              </Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="avoidStairs"
-                checked={options.avoidStairs}
-                onCheckedChange={(checked) =>
-                  setOptions({ ...options, avoidStairs: checked as boolean })
-                }
-              />
-              <Label
-                htmlFor="avoidStairs"
-                className="cursor-pointer"
-              >
-                계단 회피
-              </Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="gentleSlope"
-                checked={options.gentleSlope}
-                onCheckedChange={(checked) =>
-                  setOptions({ ...options, gentleSlope: checked as boolean })
-                }
-              />
-              <Label
-                htmlFor="gentleSlope"
-                className="cursor-pointer"
-              >
-                완만한 경사 우선
-              </Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="widePath"
-                checked={options.widePath}
-                onCheckedChange={(checked) =>
-                  setOptions({ ...options, widePath: checked as boolean })
-                }
-              />
-              <Label
-                htmlFor="widePath"
-                className="cursor-pointer"
-              >
-                넓은 경로 우선
-              </Label>
-            </div>
-          </div>
-        </Card>
 
         {/* 검색 입력 */}
         <Card className="p-4 mb-4 bg-card shadow-md">
