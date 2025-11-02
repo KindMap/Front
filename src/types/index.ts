@@ -6,6 +6,7 @@ export interface Route {
   distance: string;
   description: string;
   directionsResult?: google.maps.DirectionsResult;
+  path?: string[];
 }
 
 export interface Favorite extends Route {
@@ -118,9 +119,8 @@ export interface RoutePath {
  * 사용자 유형
  */
 export enum UserType {
-  WHEELCHAIR = 'wheelchair', // 휠체어 이용자
-  INFANT = 'infant', // 영유아 동반자
-  ELDERLY = 'elderly', // 고령자
-  PREGNANT = 'pregnant', // 임산부
-  LOW_VISION = 'low_vision', // 저시력자
+  PHY = 'Physical', // 휠체어 이용자
+  AUD = 'Auditory', // 청각장애
+  ELD = 'Elderly', // 고령자
+  VIS = 'Visual', // 저시력자
 }

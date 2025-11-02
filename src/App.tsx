@@ -4,13 +4,11 @@ import { useLoadScript } from '@react-google-maps/api';
 import { HighContrastProvider } from './contexts/HighContrastContext';
 import { VoiceGuideProvider } from './contexts/VoiceGuideContext';
 import { MapPage } from './components/MapPage';
-import { RouteSearchPage } from './components/RouteSearchPage';
 import { UserTypeSelectionPage } from './components/UserTypeSelectionPage';
-import { WheelchairRouteSearchPage } from './components/WheelchairRouteSearchPage';
-import { InfantRouteSearchPage } from './components/InfantRouteSearchPage';
+import { PhysicalDisabilityRouteSearchPage } from './components/PhysicalDisabilityRouteSearchPage';
+import { AuditoryRouteSearchPage } from './components/AuditoryRouteSearchPage';
 import { ElderlyRouteSearchPage } from './components/ElderlyRouteSearchPage';
-import { PregnantRouteSearchPage } from './components/PregnantRouteSearchPage';
-import { LowVisionRouteSearchPage } from './components/LowVisionRouteSearchPage';
+import { VisualRouteSearchPage } from './components/VisualRouteSearchPage';
 import { FavoritesPage } from './components/FavoritesPage';
 import { LoginPage } from './components/LoginPage';
 import { Route as RouteType, Favorite } from './types';
@@ -61,32 +59,23 @@ function AppContent() {
       
       {/* 각 사용자 유형별 경로검색 페이지 */}
       <Route 
-        path="/route-search/wheelchair" 
-        element={<WheelchairRouteSearchPage onRouteSelect={handleRouteSelect} addToFavorites={location.search.includes('addToFavorites=true')} />} 
+        path="/route-search/physical-disability" 
+        element={<PhysicalDisabilityRouteSearchPage onRouteSelect={handleRouteSelect} addToFavorites={location.search.includes('addToFavorites=true')} />} 
       />
       <Route 
-        path="/route-search/infant" 
-        element={<InfantRouteSearchPage onRouteSelect={handleRouteSelect} addToFavorites={location.search.includes('addToFavorites=true')} />} 
+        path="/route-search/auditory" 
+        element={<AuditoryRouteSearchPage onRouteSelect={handleRouteSelect} addToFavorites={location.search.includes('addToFavorites=true')} />} 
       />
       <Route 
         path="/route-search/elderly" 
         element={<ElderlyRouteSearchPage onRouteSelect={handleRouteSelect} addToFavorites={location.search.includes('addToFavorites=true')} />} 
       />
       <Route 
-        path="/route-search/pregnant" 
-        element={<PregnantRouteSearchPage onRouteSelect={handleRouteSelect} addToFavorites={location.search.includes('addToFavorites=true')} />} 
-      />
-      <Route 
-        path="/route-search/low-vision" 
-        element={<LowVisionRouteSearchPage onRouteSelect={handleRouteSelect} addToFavorites={location.search.includes('addToFavorites=true')} />} 
+        path="/route-search/visual" 
+        element={<VisualRouteSearchPage onRouteSelect={handleRouteSelect} addToFavorites={location.search.includes('addToFavorites=true')} />} 
       />
       
-      {/* 기존 경로검색 페이지 (하위 호환성) */}
-      <Route 
-        path="/route-search" 
-        element={<RouteSearchPage onRouteSelect={handleRouteSelect} addToFavorites={location.search.includes('addToFavorites=true')} />} 
-      />
-      
+
       <Route path="/favorites" element={<FavoritesPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="*" element={<Navigate to="/" replace />} />

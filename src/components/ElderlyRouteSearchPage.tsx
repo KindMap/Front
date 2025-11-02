@@ -5,9 +5,9 @@ import { Input } from './ui/input';
 import { Card } from './ui/card';
 import { useNavigate } from 'react-router-dom';
 import { Route } from '../types';
-import { Checkbox } from './ui/checkbox';
 import { Label } from './ui/label';
 import { useVoiceGuide } from '../contexts/VoiceGuideContext';
+import { searchRoutes } from '../services/routeApi';
 
 interface ElderlyRouteSearchPageProps {
   onRouteSelect?: (route: Route) => void;
@@ -16,7 +16,7 @@ interface ElderlyRouteSearchPageProps {
 
 /**
  * 고령자를 위한 경로검색 페이지
- * 
+ *
  * 편안하고 안전한 이동을 고려한 맞춤형 경로를 제공합니다.
  */
 export function ElderlyRouteSearchPage({ onRouteSelect, addToFavorites = false }: ElderlyRouteSearchPageProps) {
@@ -26,48 +26,46 @@ export function ElderlyRouteSearchPage({ onRouteSelect, addToFavorites = false }
   const [destination, setDestination] = useState('');
   const [routes, setRoutes] = useState<Route[]>([]);
   const [searched, setSearched] = useState(false);
-  
-  // 고령자 맞춤 옵션
-  const [options, setOptions] = useState({
-    avoidStairs: true, // 계단 회피
-    restPoints: true, // 휴게 지점 포함
-    flatRoute: true, // 평탄한 경로 우선
-    safeRoute: true, // 안전한 경로 (횡단보도, 신호등 多)
-  });
+  const [loading, setLoading] = useState(false);
 
-  const handleSearch = () => {
+  const handleSearch = async () => {
     if (!departure || !destination) return;
+    setLoading(true);
+    setSearched(false);
+    try {
+      const results = await searchRoutes(departure, destination, "ELD");
+      console.log('API Response:', results);
+      const formattedRoutes = results.routes.map((result: any) => {
+        const score = Math.floor(result.score * 100);
+        const totalMinutes = result.arrival_time;
+        const h24 = Math.floor(totalMinutes / 60);
+        const minutes = totalMinutes % 60;
+        const ampm = h24 >= 12 ? '오후' : '오전';
+        const h12 = h24 % 12;
+        const displayHours = h12 === 0 ? 12 : h12;
+        const arrivalTimeString = `${ampm} ${displayHours}시 ${minutes}분 도착`;
 
-    // TODO: 실제 API 호출 시 options를 파라미터로 전달
-    const mockRoutes: Route[] = [
-      {
-        id: 'elderly-1',
-        departure,
-        destination,
-        duration: '32분',
-        distance: '2.3km',
-        description: '🏥 휴게 벤치 5곳 | 계단 없음 | 횡단보도 신호 충분',
-      },
-      {
-        id: 'elderly-2',
-        departure,
-        destination,
-        duration: '28분',
-        distance: '2.0km',
-        description: '🏥 쉼터 3곳 | 경사 완만 | 그늘진 경로',
-      },
-      {
-        id: 'elderly-3',
-        departure,
-        destination,
-        duration: '38분',
-        distance: '2.7km',
-        description: '🏥 휴게소 多 | 엘리베이터 이용 | 의료시설 인접',
-      },
-    ];
+        const distanceString = `${(result.walking_distance / 1000).toFixed(2)}km`;
+        const descriptionString = `점수: ${score}점 | ${result.lines.join(' → ')} | 환승 ${result.transfers}회`;
 
-    setRoutes(mockRoutes);
-    setSearched(true);
+        return {
+          id: result.rank.toString(),
+          departure,
+          destination,
+          duration: arrivalTimeString,
+          distance: distanceString,
+          description: descriptionString,
+          path: result.route,
+        };
+      });
+      setRoutes(formattedRoutes);
+    } catch (error) {
+      console.error("Failed to fetch routes:", error);
+      setRoutes([]);
+    } finally {
+      setLoading(false);
+      setSearched(true);
+    }
   };
 
   const handleSelectRoute = (route: Route) => {
@@ -106,61 +104,6 @@ export function ElderlyRouteSearchPage({ onRouteSelect, addToFavorites = false }
           </div>
         </div>
 
-        {/* 검색 옵션 */}
-        <Card className="p-4 mb-4 bg-card shadow-md">
-          <h3 className="mb-3">경로 옵션</h3>
-          <div className="space-y-3">
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="avoidStairs"
-                checked={options.avoidStairs}
-                onCheckedChange={(checked) =>
-                  setOptions({ ...options, avoidStairs: checked as boolean })
-                }
-              />
-              <Label htmlFor="avoidStairs" className="cursor-pointer">
-                계단 구간 회피
-              </Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="restPoints"
-                checked={options.restPoints}
-                onCheckedChange={(checked) =>
-                  setOptions({ ...options, restPoints: checked as boolean })
-                }
-              />
-              <Label htmlFor="restPoints" className="cursor-pointer">
-                휴게 지점 포함 (벤치, 쉼터)
-              </Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="flatRoute"
-                checked={options.flatRoute}
-                onCheckedChange={(checked) =>
-                  setOptions({ ...options, flatRoute: checked as boolean })
-                }
-              />
-              <Label htmlFor="flatRoute" className="cursor-pointer">
-                평탄한 경로 우선 (경사 최소화)
-              </Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="safeRoute"
-                checked={options.safeRoute}
-                onCheckedChange={(checked) =>
-                  setOptions({ ...options, safeRoute: checked as boolean })
-                }
-              />
-              <Label htmlFor="safeRoute" className="cursor-pointer">
-                안전한 경로 (횡단보도, 신호등 多)
-              </Label>
-            </div>
-          </div>
-        </Card>
-
         {/* 검색 입력 */}
         <Card className="p-4 mb-4 bg-card shadow-md">
           <div className="space-y-3">
@@ -186,8 +129,8 @@ export function ElderlyRouteSearchPage({ onRouteSelect, addToFavorites = false }
                 onFocus={() => speak('도착지 입력란')}
               />
             </div>
-            <Button 
-              className="w-full" 
+            <Button
+              className="w-full"
               onClick={handleSearch}
               disabled={!departure || !destination}
               onMouseEnter={() => speak('경로 검색 버튼')}

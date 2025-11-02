@@ -1,73 +1,68 @@
 import { useState } from 'react';
-import { ArrowRight, ArrowLeft, Check, BadgeHelp } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Check, Ear } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Card } from './ui/card';
 import { useNavigate } from 'react-router-dom';
 import { Route } from '../types';
-import { Checkbox } from './ui/checkbox';
 import { Label } from './ui/label';
 import { useVoiceGuide } from '../contexts/VoiceGuideContext';
+import { searchRoutes } from '../services/routeApi';
 
-interface InfantRouteSearchPageProps {
+interface AuditoryRouteSearchPageProps {
   onRouteSelect?: (route: Route) => void;
   addToFavorites?: boolean;
 }
 
 /**
- * 영유아 동반자를 위한 경로검색 페이지
- * 
- * 유모차 접근성을 고려한 맞춤형 경로를 제공합니다.
+ * 청각장애인을 위한 경로검색 페이지
+ *
+ * 시각적 안내 및 명확한 정보 전달에 중점을 둔 경로를 제공합니다.
  */
-export function InfantRouteSearchPage({ onRouteSelect, addToFavorites = false }: InfantRouteSearchPageProps) {
+export function AuditoryRouteSearchPage({ onRouteSelect, addToFavorites = false }: AuditoryRouteSearchPageProps) {
   const navigate = useNavigate();
   const { speak } = useVoiceGuide();
   const [departure, setDeparture] = useState('');
   const [destination, setDestination] = useState('');
   const [routes, setRoutes] = useState<Route[]>([]);
   const [searched, setSearched] = useState(false);
-  
-  // 영유아 동반자 맞춤 옵션
-  const [options, setOptions] = useState({
-    strollerFriendly: true, // 유모차 이동 가능
-    nursingRoom: false, // 수유실 경유
-    restArea: true, // 휴게 공간 포함
-    elevatorPrefer: true, // 엘리베이터 우선
-  });
+  const [loading, setLoading] = useState(false);
 
-  const handleSearch = () => {
+  const handleSearch = async () => {
     if (!departure || !destination) return;
+    setLoading(true);
+    setSearched(false);
+    try {
+      const results = await searchRoutes(departure, destination, "AUD");
+      console.log('API Response:', results);
+      const formattedRoutes = results.routes.map((result: any) => {
+        const score = Math.floor(result.score * 100);
+        const totalMinutes = result.arrival_time;
+        const h24 = Math.floor(totalMinutes / 60);
+        const minutes = totalMinutes % 60;
+        const ampm = h24 >= 12 ? '오후' : '오전';
+        const h12 = h24 % 12;
+        const displayHours = h12 === 0 ? 12 : h12;
+        const arrivalTimeString = `${ampm} ${displayHours}시 ${minutes}분 도착`;
 
-    // TODO: 실제 API 호출 시 options를 파라미터로 전달
-    const mockRoutes: Route[] = [
-      {
-        id: 'infant-1',
-        departure,
-        destination,
-        duration: '30분',
-        distance: '2.8km',
-        description: '👶 수유실 2곳 | 엘리베이터 이용 | 유모차 통행 가능',
-      },
-      {
-        id: 'infant-2',
-        departure,
-        destination,
-        duration: '27분',
-        distance: '2.5km',
-        description: '👶 휴게 벤치 多 | 경사 완만 | 자동문 설치',
-      },
-      {
-        id: 'infant-3',
-        departure,
-        destination,
-        duration: '35분',
-        distance: '3.2km',
-        description: '👶 수유실 3곳 | 기저귀 교환대 | 유모차 대여 가능',
-      },
-    ];
-
-    setRoutes(mockRoutes);
-    setSearched(true);
+        return {
+          id: result.rank.toString(),
+          departure,
+          destination,
+          duration: arrivalTimeString,
+          distance: `${(result.walking_distance / 1000).toFixed(2)}km`,
+          description: `점수: ${score}점 | ${result.lines.join(' → ')} | 환승 ${result.transfers}회`,
+          path: result.route,
+        };
+      });
+      setRoutes(formattedRoutes);
+    } catch (error) {
+      console.error("Failed to fetch routes:", error);
+      setRoutes([]);
+    } finally {
+      setLoading(false);
+      setSearched(true);
+    }
   };
 
   const handleSelectRoute = (route: Route) => {
@@ -94,72 +89,17 @@ export function InfantRouteSearchPage({ onRouteSelect, addToFavorites = false }:
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-pink-600 rounded-lg">
-              <BadgeHelp className="w-6 h-6 text-white" />
+            <div className="p-2 bg-blue-600 rounded-lg">
+              <Ear className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="mb-1">영유아 동반자 경로검색</h1>
+              <h1 className="mb-1">청각장애인 경로검색</h1>
               <p className="text-sm text-muted-foreground">
-                유모차와 함께 안전하게 이동할 수 있는 경로를 찾아드립니다
+                시각적 안내를 통해 안전하게 이동할 수 있는 경로를 찾아드립니다
               </p>
             </div>
           </div>
         </div>
-
-        {/* 검색 옵션 */}
-        <Card className="p-4 mb-4 bg-card shadow-md">
-          <h3 className="mb-3">경로 옵션</h3>
-          <div className="space-y-3">
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="strollerFriendly"
-                checked={options.strollerFriendly}
-                onCheckedChange={(checked) =>
-                  setOptions({ ...options, strollerFriendly: checked as boolean })
-                }
-              />
-              <Label htmlFor="strollerFriendly" className="cursor-pointer">
-                유모�� 이동 가능 경로만
-              </Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="nursingRoom"
-                checked={options.nursingRoom}
-                onCheckedChange={(checked) =>
-                  setOptions({ ...options, nursingRoom: checked as boolean })
-                }
-              />
-              <Label htmlFor="nursingRoom" className="cursor-pointer">
-                수유실 근처 경유
-              </Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="restArea"
-                checked={options.restArea}
-                onCheckedChange={(checked) =>
-                  setOptions({ ...options, restArea: checked as boolean })
-                }
-              />
-              <Label htmlFor="restArea" className="cursor-pointer">
-                휴게 공간 포함
-              </Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="elevatorPrefer"
-                checked={options.elevatorPrefer}
-                onCheckedChange={(checked) =>
-                  setOptions({ ...options, elevatorPrefer: checked as boolean })
-                }
-              />
-              <Label htmlFor="elevatorPrefer" className="cursor-pointer">
-                엘리베이터 우선 (계단 최소화)
-              </Label>
-            </div>
-          </div>
-        </Card>
 
         {/* 검색 입력 */}
         <Card className="p-4 mb-4 bg-card shadow-md">
@@ -212,7 +152,7 @@ export function InfantRouteSearchPage({ onRouteSelect, addToFavorites = false }:
                 <div className="flex justify-between items-start mb-2">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="text-pink-600">{route.duration}</span>
+                      <span className="text-blue-600">{route.duration}</span>
                       <span className="text-muted-foreground">·</span>
                       <span className="text-muted-foreground">{route.distance}</span>
                     </div>
