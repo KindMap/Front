@@ -37,11 +37,19 @@ export function VisualRouteSearchPage({ onRouteSelect, addToFavorites = false }:
       console.log('API Response:', results);
       const formattedRoutes = results.routes.map((result: any) => {
         const score = Math.floor(result.score * 100);
+        const totalMinutes = result.arrival_time;
+        const h24 = Math.floor(totalMinutes / 60);
+        const minutes = totalMinutes % 60;
+        const ampm = h24 >= 12 ? '오후' : '오전';
+        const h12 = h24 % 12;
+        const displayHours = h12 === 0 ? 12 : h12;
+        const arrivalTimeString = `${ampm} ${displayHours}시 ${minutes}분 도착`;
+
         return {
           id: result.rank.toString(),
           departure,
           destination,
-          duration: `${result.arrival_time}분`,
+          duration: arrivalTimeString,
           distance: `${(result.walking_distance / 1000).toFixed(2)}km`,
           description: `점수: ${score}점 | ${result.lines.join(' → ')} | 환승 ${result.transfers}회`,
           path: result.route,

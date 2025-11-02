@@ -4,7 +4,6 @@ import { useLoadScript } from '@react-google-maps/api';
 import { HighContrastProvider } from './contexts/HighContrastContext';
 import { VoiceGuideProvider } from './contexts/VoiceGuideContext';
 import { MapPage } from './components/MapPage';
-import { RouteSearchPage } from './components/RouteSearchPage';
 import { UserTypeSelectionPage } from './components/UserTypeSelectionPage';
 import { PhysicalDisabilityRouteSearchPage } from './components/PhysicalDisabilityRouteSearchPage';
 import { AuditoryRouteSearchPage } from './components/AuditoryRouteSearchPage';
@@ -76,12 +75,7 @@ function AppContent() {
         element={<VisualRouteSearchPage onRouteSelect={handleRouteSelect} addToFavorites={location.search.includes('addToFavorites=true')} />} 
       />
       
-      {/* 기존 경로검색 페이지 (하위 호환성) */}
-      <Route 
-        path="/route-search" 
-        element={<RouteSearchPage onRouteSelect={handleRouteSelect} addToFavorites={location.search.includes('addToFavorites=true')} />} 
-      />
-      
+
       <Route path="/favorites" element={<FavoritesPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="*" element={<Navigate to="/" replace />} />

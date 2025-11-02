@@ -25,7 +25,7 @@ export async function searchRoutes(
   origin: string,
   destination: string,
   disability_type: string
-): Promise<any[]> { // API 응답 타입에 맞게 수정해야 합니다.
+): Promise<any> { // API 응답 타입에 맞게 수정해야 합니다.
   try {
     const now = new Date();
     const departure_time = now.getHours() * 60 + now.getMinutes();

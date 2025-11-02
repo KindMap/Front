@@ -423,6 +423,10 @@ export function MapPage({ selectedRoute }: MapPageProps) {
       {selectedRoute && (
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-white p-4 rounded-lg shadow-xl max-w-md w-full mx-4">
           <h3 className="mb-2">선택된 경로</h3>
+          <div className="flex items-center gap-4 mb-2">
+            <span className="font-bold text-lg">{selectedRoute.duration}</span>
+            <span className="text-muted-foreground">{selectedRoute.distance}</span>
+          </div>
           <p className="text-muted-foreground mb-1">
             출발: {selectedRoute.departure}
           </p>

@@ -37,8 +37,14 @@ export function PhysicalDisabilityRouteSearchPage({ onRouteSelect, addToFavorite
       console.log('API Response:', results); // Log the raw response
       const formattedRoutes = results.routes.map((result: any) => {
         const score = Math.floor(result.score * 100);
-        const durationMinutes = result.arrival_time; // Assuming arrival_time is in minutes
-        const durationString = `${durationMinutes}분`;
+        const totalMinutes = result.arrival_time;
+        const h24 = Math.floor(totalMinutes / 60);
+        const minutes = totalMinutes % 60;
+        const ampm = h24 >= 12 ? '오후' : '오전';
+        const h12 = h24 % 12;
+        const displayHours = h12 === 0 ? 12 : h12;
+        const arrivalTimeString = `${ampm} ${displayHours}시 ${minutes}분 도착`;
+
         const distanceString = `${(result.walking_distance / 1000).toFixed(2)}km`; // Convert meters to km
         const descriptionString = `점수: ${score}점 | ${result.lines.join(' → ')} | 환승 ${result.transfers}회`;
 
@@ -46,7 +52,7 @@ export function PhysicalDisabilityRouteSearchPage({ onRouteSelect, addToFavorite
           id: result.rank.toString(),
           departure,
           destination,
-          duration: durationString,
+          duration: arrivalTimeString,
           distance: distanceString,
           description: descriptionString,
           path: result.route, // This is the array of station names
