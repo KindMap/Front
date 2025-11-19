@@ -6,7 +6,7 @@ on:
       - main
 
 permissions:
-  id-token: write # OIDC를 위한 권한
+  id-token: write   # OIDC를 위한 권한
   contents: read
 
 jobs:
@@ -20,8 +20,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
-          cache: "npm"
+          node-version: '20'
+          cache: 'npm'
 
       - name: Install dependencies
         run: npm ci
@@ -52,24 +52,24 @@ jobs:
           echo "Extracted bucket name: $BUCKET_NAME"
 
       # --- 🚨 중요: 수정된 배포 단계 🚨 ---
-      - name: Deploy to S3 (Bypass ListBucket Requirement)
+      - name: Deploy to S3 (Upload Only - ListBucket Not Available)
         run: |
           BUCKET_NAME="${{ steps.extract-bucket.outputs.bucket-name }}"
           S3_URI="s3://${BUCKET_NAME}"
 
           echo "🚀 Starting Deployment to ${S3_URI}"
-
-          # 1. 기존 파일 모두 삭제 (s3:DeleteObject 권한만 필요)
-          # 'sync --delete'의 파일 삭제 역할을 수행합니다.
-          echo "1/2: Deleting all existing objects from S3 bucket..."
-          # '--recursive'는 s3:DeleteObject를 사용하여 모든 객체를 삭제합니다.
-          aws s3 rm "${S3_URI}/" --recursive
-
-          # 2. 새로운 빌드 파일 업로드 (s3:PutObject 권한만 필요)
-          echo "2/2: Copying new files from build/..."
+          
+          # 참고: S3에서 파일을 삭제(rm --recursive)하거나 동기화(sync --delete)하려면 
+          # 반드시 's3:ListBucket' 권한이 필요합니다.
+          # 현재 권한이 부족하므로, 삭제 기능은 생략하고 업로드만 진행합니다.
+          echo "⚠️ WARNING: Skipping S3 cleanup/delete operation due to missing s3:ListBucket permission."
+          echo "Only new/modified files will be uploaded (s3:PutObject)."
+          
+          # 새로운 빌드 파일 업로드 (s3:PutObject 권한만 필요)
+          echo "Uploading new files from build/..."
           # '--recursive'는 s3:PutObject를 사용하여 파일을 업로드합니다.
           aws s3 cp build/ "${S3_URI}/" --recursive
-
+          
         env:
           AWS_REGION: ${{ secrets.AWS_REGION }}
       # --- 수정된 배포 단계 종료 ---
