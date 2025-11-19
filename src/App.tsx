@@ -13,7 +13,7 @@ import { FavoritesPage } from './components/FavoritesPage';
 import { LoginPage } from './components/LoginPage';
 import { Route as RouteType, Favorite } from './types';
 
-const GOOGLE_MAPS_API_KEY = 'AIzaSyAvx8bGk5wtq5tTOE5q2S06SkLZJakUItM';
+const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 const libraries: ("places" | "geometry")[] = ["places", "geometry"];
 
 function AppContent() {

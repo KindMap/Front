@@ -64,7 +64,7 @@ src/
 ### 지도 및 위치 서비스
 - **@react-google-maps/api**: Google Maps React 통합
   - places, geometry 라이브러리 사용
-  - API Key: `AIzaSyAvx8bGk5wtq5tTOE5q2S06SkLZJakUItM` ⚠️ (하드코딩됨)
+  - API Key: 환경변수 `VITE_GOOGLE_MAPS_API_KEY`로 관리 ✅
 
 ### 추가 라이브러리
 - **React Hook Form**: 폼 관리
