@@ -6,7 +6,7 @@ on:
       - main
 
 permissions:
-  id-token: write   # OIDC를 위한 권한
+  id-token: write # OIDC를 위한 권한
   contents: read
 
 jobs:
@@ -20,15 +20,15 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20"
+          cache: "npm"
 
       - name: Install dependencies
         run: npm ci
 
       - name: Create .env file
         run: |
-          # 환경 변수 파일을 생성합니다.
+          # 빌드에 필요한 환경 변수 파일을 생성합니다.
           echo "VITE_GOOGLE_MAPS_API_KEY=${{ secrets.VITE_GOOGLE_MAPS_API_KEY }}" >> .env
           echo "VITE_WS_BASE_URL=${{ secrets.VITE_WS_BASE_URL }}" >> .env
           echo "VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }}" >> .env
@@ -51,32 +51,26 @@ jobs:
           echo "bucket-name=$BUCKET_NAME" >> $GITHUB_OUTPUT
           echo "Extracted bucket name: $BUCKET_NAME"
 
-      # --- 🚨 중요: 수정된 배포 단계 🚨 ---
-      - name: Deploy to S3 (Upload Only - ListBucket Not Available)
+      # --- ListBucket 권한 추가 완료: aws s3 sync --delete 사용 ---
+      - name: Deploy and Synchronize to S3
         run: |
           BUCKET_NAME="${{ steps.extract-bucket.outputs.bucket-name }}"
           S3_URI="s3://${BUCKET_NAME}"
 
-          echo "🚀 Starting Deployment to ${S3_URI}"
-          
-          # 참고: S3에서 파일을 삭제(rm --recursive)하거나 동기화(sync --delete)하려면 
-          # 반드시 's3:ListBucket' 권한이 필요합니다.
-          # 현재 권한이 부족하므로, 삭제 기능은 생략하고 업로드만 진행합니다.
-          echo "⚠️ WARNING: Skipping S3 cleanup/delete operation due to missing s3:ListBucket permission."
-          echo "Only new/modified files will be uploaded (s3:PutObject)."
-          
-          # 새로운 빌드 파일 업로드 (s3:PutObject 권한만 필요)
-          echo "Uploading new files from build/..."
-          # '--recursive'는 s3:PutObject를 사용하여 파일을 업로드합니다.
-          aws s3 cp build/ "${S3_URI}/" --recursive
-          
+          echo "🚀 Starting Synchronization Deployment to ${S3_URI}"
+
+          # 's3:ListBucket' 권한을 사용하여 S3의 객체 목록을 확인하고,
+          # 'build/'와 S3 버킷을 완벽히 일치시킵니다.
+          # '--delete' 옵션으로 로컬에 없는 S3 파일은 삭제됩니다.
+          aws s3 sync build/ "${S3_URI}/" --delete
+
         env:
           AWS_REGION: ${{ secrets.AWS_REGION }}
-      # --- 수정된 배포 단계 종료 ---
+      # --- 동기화 배포 단계 종료 ---
 
       - name: Deployment complete
         run: |
-          echo "✅ Deployment completed successfully!"
+          echo "✅ Deployment completed successfully! All files are fully synchronized."
           echo "S3 Bucket ARN: ${{ secrets.S3_BUCKET_ARN }}"
           echo "S3 Bucket Name: ${{ steps.extract-bucket.outputs.bucket-name }}"
           echo "Region: ${{ secrets.AWS_REGION }}"
