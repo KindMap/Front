@@ -1,0 +1,57 @@
+name: Deploy to S3
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  id-token: write  # OIDC를 위한 권한
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build project
+        run: npm run build
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Extract bucket name from ARN
+        id: extract-bucket
+        run: |
+          BUCKET_ARN="${{ secrets.S3_BUCKET_ARN }}"
+          BUCKET_NAME="${BUCKET_ARN#arn:aws:s3:::}"
+          echo "bucket-name=$BUCKET_NAME" >> $GITHUB_OUTPUT
+          echo "Extracted bucket name: $BUCKET_NAME"
+
+      - name: Deploy to S3
+        run: |
+          aws s3 sync dist/ s3://${{ steps.extract-bucket.outputs.bucket-name }} --delete
+        env:
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+
+      - name: Deployment complete
+        run: |
+          echo "🚀 Deployment completed successfully!"
+          echo "S3 Bucket ARN: ${{ secrets.S3_BUCKET_ARN }}"
+          echo "S3 Bucket Name: ${{ steps.extract-bucket.outputs.bucket-name }}"
+          echo "Region: ${{ secrets.AWS_REGION }}"
