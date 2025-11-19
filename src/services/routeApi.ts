@@ -1,7 +1,7 @@
 import { Route } from "../types";
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
-
+// base url 수정 완료
 export interface RouteSearchResult {
   id: string;
   departure: string;
