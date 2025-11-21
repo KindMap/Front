@@ -44,19 +44,19 @@ export function LoginPage() {
         <div className="text-center mb-8">
           <h1 className="mb-2">로그인</h1>
           <p className="text-muted-foreground">
-            교통 약자 지원 서비스
+            계정에 로그인하세요
           </p>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-4 mb-6">
           <div>
-            <label className="block mb-2">아이디</label>
+            <label className="block mb-2">사용자</label>
             <Input
               type="email"
               placeholder="이메일을 입력하세요"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              onFocus={() => speak('아이디 입력란')}
+              onFocus={() => speak('사용자 입력')}
               required
             />
           </div>
@@ -67,14 +67,14 @@ export function LoginPage() {
               placeholder="비밀번호를 입력하세요"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              onFocus={() => speak('비밀번호 입력란')}
+              onFocus={() => speak('비밀번호 입력')}
               required
             />
           </div>
-          <Button 
-            type="submit" 
+          <Button
+            type="submit"
             className="w-full"
-            onMouseEnter={() => speak('로그인 버튼')}
+            onMouseEnter={() => speak('로그인하기')}
           >
             로그인
           </Button>
@@ -86,7 +86,7 @@ export function LoginPage() {
           </div>
           <div className="relative flex justify-center">
             <span className="bg-card px-4 text-muted-foreground">
-              간편 로그인
+              소셜 로그인
             </span>
           </div>
         </div>
@@ -98,7 +98,7 @@ export function LoginPage() {
             variant="outline"
             className="h-14"
             onClick={() => handleSocialLogin('Google')}
-            onMouseEnter={() => speak('구글 로그인')}
+            onMouseEnter={() => speak('구글로 로그인')}
           >
             <div className="flex flex-col items-center gap-1">
               <svg className="w-6 h-6" viewBox="0 0 24 24">
@@ -129,12 +129,12 @@ export function LoginPage() {
             variant="outline"
             className="h-14"
             onClick={() => handleSocialLogin('Kakao')}
-            onMouseEnter={() => speak('카카오 로그인')}
+            onMouseEnter={() => speak('카카오로 로그인')}
           >
             <div className="flex flex-col items-center gap-1">
               <div className="w-6 h-6 rounded-full bg-[#FEE500] flex items-center justify-center">
                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="#000000">
-                  <path d="M12 3C6.477 3 2 6.477 2 10.75c0 2.567 1.656 4.824 4.157 6.151-.175.642-.644 2.367-.738 2.75-.113.462.168.455.354.331.145-.097 2.363-1.584 3.268-2.186.639.088 1.297.134 1.959.134 5.523 0 10-3.477 10-7.75S17.523 3 12 3z" />
+                  <path d="M12 3C6.477 3 2 6.477 2 10.75c0 2.567 1.656 4.824 4.157 6.151-.175.642-.644 2.367-.738 2.75-.113.462.168.455.354.331.145-.097 2.363-1.584 3.268-2.1" />
                 </svg>
               </div>
               <span className="text-xs">Kakao</span>
@@ -147,26 +147,15 @@ export function LoginPage() {
             variant="outline"
             className="h-14"
             onClick={() => handleSocialLogin('Naver')}
-            onMouseEnter={() => speak('네이버 로그인')}
+            onMouseEnter={() => speak('네이버로 로그인')}
           >
             <div className="flex flex-col items-center gap-1">
-              <div className="w-6 h-6 rounded-sm bg-[#03C75A] flex items-center justify-center">
-                <span className="text-white text-xs">N</span>
+              <div className="w-6 h-6 bg-[#03C75A] flex items-center justify-center text-white font-bold text-lg">
+                N
               </div>
               <span className="text-xs">Naver</span>
             </div>
           </Button>
-        </div>
-
-        <div className="mt-6 text-center">
-          <button
-            type="button"
-            className="text-sm text-muted-foreground hover:underline"
-            onClick={() => console.log('Sign up')}
-            onMouseEnter={() => speak('회원가입')}
-          >
-            계정이 없으신가요? 회원가입
-          </button>
         </div>
       </Card>
     </div>

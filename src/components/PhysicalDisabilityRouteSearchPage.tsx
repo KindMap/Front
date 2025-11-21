@@ -15,9 +15,9 @@ interface PhysicalDisabilityRouteSearchPageProps {
 }
 
 /**
- * 지체장애인을 위한 경로검색 페이지
+ * 지체장애인을 위한 경로 검색 페이지 컴포넌트입니다.
  *
- * 휠체어, 보행 보조기구 이용자의 접근성을 고려한 경로를 제공합니다.
+ * 휠체어, 엘리베이터 등 접근성을 고려한 최적의 경로를 추천하여 이동 편의를 돕습니다.
  */
 export function PhysicalDisabilityRouteSearchPage({ onRouteSelect, addToFavorites = false }: PhysicalDisabilityRouteSearchPageProps) {
   const navigate = useNavigate();
@@ -46,7 +46,7 @@ export function PhysicalDisabilityRouteSearchPage({ onRouteSelect, addToFavorite
         const arrivalTimeString = `${ampm} ${displayHours}시 ${minutes}분 도착`;
 
         const distanceString = `${(result.walking_distance / 1000).toFixed(2)}km`; // Convert meters to km
-        const descriptionString = `점수: ${score}점 | ${result.lines.join(' → ')} | 환승 ${result.transfers}회`;
+        const descriptionString = `안전 점수 ${score} | ${result.lines.join(' → ')} | 환승 ${result.transfers}회`;
 
         return {
           id: result.rank.toString(),
@@ -96,15 +96,15 @@ export function PhysicalDisabilityRouteSearchPage({ onRouteSelect, addToFavorite
               <Accessibility className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="mb-1">지체장애인 경로검색</h1>
+              <h1 className="mb-1">지체장애인 경로 검색</h1>
               <p className="text-sm text-muted-foreground">
-                보행 및 이동 편의를 고려한 최적 경로를 찾아드립니다
+                접근성을 고려한 최적의 경로를 탐색하세요.
               </p>
             </div>
           </div>
         </div>
 
-        {/* 검색 입력 */}
+        {/* 경로 검색 */}
         <Card className="p-4 mb-4 bg-card shadow-md">
           <div className="space-y-3">
             <div>
@@ -115,7 +115,7 @@ export function PhysicalDisabilityRouteSearchPage({ onRouteSelect, addToFavorite
                 value={departure}
                 onChange={(e) => setDeparture(e.target.value)}
                 className="mt-1"
-                onFocus={() => speak('출발지 입력란')}
+                onFocus={() => speak('출발지 입력')}
               />
             </div>
             <div>
@@ -126,14 +126,14 @@ export function PhysicalDisabilityRouteSearchPage({ onRouteSelect, addToFavorite
                 value={destination}
                 onChange={(e) => setDestination(e.target.value)}
                 className="mt-1"
-                onFocus={() => speak('도착지 입력란')}
+                onFocus={() => speak('도착지 입력')}
               />
             </div>
             <Button
               className="w-full"
               onClick={handleSearch}
               disabled={!departure || !destination}
-              onMouseEnter={() => speak('경로 검색 버튼')}
+              onMouseEnter={() => speak('경로 검색하기')}
             >
               <ArrowRight className="w-4 h-4 mr-2" />
               경로 검색
@@ -156,19 +156,19 @@ export function PhysicalDisabilityRouteSearchPage({ onRouteSelect, addToFavorite
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
                       <span className="text-purple-600">{route.duration}</span>
-                      <span className="text-muted-foreground">·</span>
+                      <span className="text-muted-foreground">|</span>
                       <span className="text-muted-foreground">{route.distance}</span>
                     </div>
                     <p className="text-sm text-muted-foreground">
                       {route.description}
                     </p>
                   </div>
-                  <Button 
-                    size="sm" 
+                  <Button
+                    size="sm"
                     variant="outline"
                     onMouseEnter={(e) => {
                       e.stopPropagation();
-                      speak('경로 선택');
+                      speak('경로 선택하기');
                     }}
                   >
                     <Check className="w-4 h-4 mr-1" />
@@ -183,7 +183,7 @@ export function PhysicalDisabilityRouteSearchPage({ onRouteSelect, addToFavorite
         {searched && routes.length === 0 && (
           <Card className="p-8 text-center bg-card">
             <p className="text-muted-foreground">
-              검색 결과가 없습니다. 다른 출발지나 도착지를 입력해주세요.
+              검색 결과가 없습니다. 다른 출발지나 도착지를 입력해 주세요.
             </p>
           </Card>
         )}

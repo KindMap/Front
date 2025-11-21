@@ -15,9 +15,9 @@ interface ElderlyRouteSearchPageProps {
 }
 
 /**
- * 고령자를 위한 경로검색 페이지
+ * 노약자를 위한 경로 검색 페이지 컴포넌트입니다.
  *
- * 편안하고 안전한 이동을 고려한 맞춤형 경로를 제공합니다.
+ * 음성 안내 및 확대 기능을 활용하여 사용자가 편안하게 경로를 검색하고 선택할 수 있도록 돕습니다.
  */
 export function ElderlyRouteSearchPage({ onRouteSelect, addToFavorites = false }: ElderlyRouteSearchPageProps) {
   const navigate = useNavigate();
@@ -33,7 +33,7 @@ export function ElderlyRouteSearchPage({ onRouteSelect, addToFavorites = false }
     setLoading(true);
     setSearched(false);
     try {
-      const results = await searchRoutes(departure, destination, "ELD");
+      const results = await searchRoutes(departure, destination, "ELDERLY");
       console.log('API Response:', results);
       const formattedRoutes = results.routes.map((result: any) => {
         const score = Math.floor(result.score * 100);
@@ -46,7 +46,7 @@ export function ElderlyRouteSearchPage({ onRouteSelect, addToFavorites = false }
         const arrivalTimeString = `${ampm} ${displayHours}시 ${minutes}분 도착`;
 
         const distanceString = `${(result.walking_distance / 1000).toFixed(2)}km`;
-        const descriptionString = `점수: ${score}점 | ${result.lines.join(' → ')} | 환승 ${result.transfers}회`;
+        const descriptionString = `안전 점수 ${score} | ${result.lines.join(' → ')} | 환승 ${result.transfers}회`;
 
         return {
           id: result.rank.toString(),
@@ -96,15 +96,15 @@ export function ElderlyRouteSearchPage({ onRouteSelect, addToFavorites = false }
               <Users className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="mb-1">고령자 경로검색</h1>
+              <h1 className="mb-1">노약자 경로 검색</h1>
               <p className="text-sm text-muted-foreground">
-                편안하고 안전하게 이동할 수 있는 경로를 찾아드립니다
+                음성 안내를 통해 편리하게 경로를 탐색하세요.
               </p>
             </div>
           </div>
         </div>
 
-        {/* 검색 입력 */}
+        {/* 경로 검색 */}
         <Card className="p-4 mb-4 bg-card shadow-md">
           <div className="space-y-3">
             <div>
@@ -115,7 +115,7 @@ export function ElderlyRouteSearchPage({ onRouteSelect, addToFavorites = false }
                 value={departure}
                 onChange={(e) => setDeparture(e.target.value)}
                 className="mt-1"
-                onFocus={() => speak('출발지 입력란')}
+                onFocus={() => speak('출발지 입력')}
               />
             </div>
             <div>
@@ -126,14 +126,14 @@ export function ElderlyRouteSearchPage({ onRouteSelect, addToFavorites = false }
                 value={destination}
                 onChange={(e) => setDestination(e.target.value)}
                 className="mt-1"
-                onFocus={() => speak('도착지 입력란')}
+                onFocus={() => speak('도착지 입력')}
               />
             </div>
             <Button
               className="w-full"
               onClick={handleSearch}
               disabled={!departure || !destination}
-              onMouseEnter={() => speak('경로 검색 버튼')}
+              onMouseEnter={() => speak('경로 검색하기')}
             >
               <ArrowRight className="w-4 h-4 mr-2" />
               경로 검색
@@ -156,19 +156,19 @@ export function ElderlyRouteSearchPage({ onRouteSelect, addToFavorites = false }
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
                       <span className="text-green-600">{route.duration}</span>
-                      <span className="text-muted-foreground">·</span>
+                      <span className="text-muted-foreground">|</span>
                       <span className="text-muted-foreground">{route.distance}</span>
                     </div>
                     <p className="text-sm text-muted-foreground">
                       {route.description}
                     </p>
                   </div>
-                  <Button 
-                    size="sm" 
+                  <Button
+                    size="sm"
                     variant="outline"
                     onMouseEnter={(e) => {
                       e.stopPropagation();
-                      speak('경로 선택');
+                      speak('경로 선택하기');
                     }}
                   >
                     <Check className="w-4 h-4 mr-1" />
@@ -183,7 +183,7 @@ export function ElderlyRouteSearchPage({ onRouteSelect, addToFavorites = false }
         {searched && routes.length === 0 && (
           <Card className="p-8 text-center bg-card">
             <p className="text-muted-foreground">
-              검색 결과가 없습니다. 다른 출발지나 도착지를 입력해주세요.
+              검색 결과가 없습니다. 다른 출발지나 도착지를 입력해 주세요.
             </p>
           </Card>
         )}

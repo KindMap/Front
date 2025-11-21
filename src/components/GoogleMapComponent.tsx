@@ -1,7 +1,17 @@
 import { useEffect, useRef, useState } from 'react';
-import { GoogleMap, Marker, Polyline } from '@react-google-maps/api';
+import { GoogleMap, Marker, Polyline, InfoWindow } from '@react-google-maps/api';
 import { Facility, Obstacle } from '../types';
 import { useHighContrast } from '../contexts/HighContrastContext';
+
+// Note: This type should ideally be in a shared types file
+interface StationSearchResult {
+  station_id: number;
+  line: string;
+  name: string;
+  lat: string;
+  lng: string;
+  station_cd: string;
+}
 
 interface GoogleMapComponentProps {
   showFacilities?: boolean;
@@ -12,6 +22,8 @@ interface GoogleMapComponentProps {
   zoomLevel?: number;
   center?: { lat: number; lng: number } | null;
   onCenterChange?: (center: { lat: number; lng: number }) => void;
+  selectedStation?: StationSearchResult | null;
+  onSelectedStationClose?: () => void;
 }
 
 const defaultCenter = {
@@ -24,7 +36,7 @@ const mapContainerStyle = {
   height: '100%'
 };
 
-// 고대비 모드 지도 스타일
+// 고대비 지도 스타일
 const highContrastMapStyles: google.maps.MapTypeStyle[] = [
   {
     elementType: 'geometry',
@@ -124,13 +136,15 @@ export function GoogleMapComponent({
   zoomLevel = 100,
   center,
   onCenterChange,
+  selectedStation,
+  onSelectedStationClose,
 }: GoogleMapComponentProps) {
   const { isHighContrast } = useHighContrast();
   const mapRef = useRef<google.maps.Map | null>(null);
   const [currentLocation, setCurrentLocation] = useState<google.maps.LatLngLiteral | null>(null);
   const [mapCenter, setMapCenter] = useState<google.maps.LatLngLiteral>(defaultCenter);
 
-  // 현재 위치 가져오기
+  // 사용자 현재 위치 가져오기
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -140,7 +154,7 @@ export function GoogleMapComponent({
             lng: position.coords.longitude,
           };
           setCurrentLocation(pos);
-          
+
           if (!center) {
             setMapCenter(pos);
             if (mapRef.current) {
@@ -164,7 +178,7 @@ export function GoogleMapComponent({
     }
   }, [center]);
 
-  // center prop이 변경되면 지도 이동
+  // center prop에 따라 지도 이동
   useEffect(() => {
     if (center && mapRef.current) {
       mapRef.current.panTo(center);
@@ -172,7 +186,7 @@ export function GoogleMapComponent({
     }
   }, [center]);
 
-  // 줌 레벨 변경
+  // 줌 레벨 적용
   useEffect(() => {
     if (mapRef.current) {
       const googleZoom = Math.round(12 + ((zoomLevel - 70) / 80) * 6);
@@ -180,7 +194,7 @@ export function GoogleMapComponent({
     }
   }, [zoomLevel]);
 
-  // 고대비 모드 변경 시 지도 스타일 업데이트
+  // 고대비 스타일 적용/해제
   useEffect(() => {
     if (mapRef.current) {
       mapRef.current.setOptions({
@@ -226,7 +240,7 @@ export function GoogleMapComponent({
         <div key={responseIndex}>
           {response.routes[0] && (
             <>
-              {response.routes[0].legs.map((leg, legIndex) => 
+              {response.routes[0].legs.map((leg, legIndex) =>
                 leg.steps.map((step, stepIndex) => {
                   const key = `${responseIndex}-${legIndex}-${stepIndex}`;
                   let strokeColor = isHighContrast ? '#ffff00' : '#2563eb'; // Default color
@@ -257,6 +271,22 @@ export function GoogleMapComponent({
           )}
         </div>
       ))}
+
+      {/* 선택된 역 정보창 표시 */}
+      {selectedStation && (
+        <InfoWindow
+          position={{
+            lat: parseFloat(selectedStation.lat),
+            lng: parseFloat(selectedStation.lng),
+          }}
+          onCloseClick={onSelectedStationClose}
+        >
+          <div className="p-2">
+            <h4 className="font-bold">{selectedStation.name}</h4>
+            <p className="text-sm text-muted-foreground">{selectedStation.line}</p>
+          </div>
+        </InfoWindow>
+      )}
     </GoogleMap>
   );
 }
