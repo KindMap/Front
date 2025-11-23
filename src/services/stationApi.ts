@@ -1,4 +1,4 @@
-const API_BASE_URL = '/stationapi';
+const API_BASE_URL = 'https://k5d98563c8.execute-api.us-west-2.amazonaws.com/inha-capstone-03';
 
 export interface StationData {
   data: {
