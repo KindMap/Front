@@ -25,6 +25,7 @@ export interface CustomMarker {
     title: string;
     content: string; // Can be HTML
   };
+  icon?: string | google.maps.Icon | google.maps.Symbol | null;
 }
 
 
@@ -243,6 +244,7 @@ export function GoogleMapComponent({
           key={index}
           position={marker.position}
           label={marker.label}
+          icon={marker.icon}
           onClick={() => setActiveMarker(index)}
         >
           {activeMarker === index && marker.info && (

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -16,7 +16,6 @@ import {
   MapPin,
   Search,
   Volume2,
-  VolumeX,
 } from 'lucide-react';
 import { useHighContrast } from '../contexts/HighContrastContext';
 import { useVoiceGuide } from '../contexts/VoiceGuideContext';
@@ -30,22 +29,18 @@ import {
   searchStations,
   StationSearchResult,
 } from '../services/stationApi';
+import { lineColors } from '../styles/lineColors';
 
 interface MapPageProps {
   selectedRoute?: Route | null;
 }
 
-const getLineColor = (line: string): string => {
-  if (line.includes('1호선')) return '#0052A4';
-  if (line.includes('2호선')) return '#00A84D';
-  if (line.includes('3호선')) return '#EF7C1C';
-  if (line.includes('4호선')) return '#00A4E3';
-  if (line.includes('5호선')) return '#996CAC';
-  if (line.includes('6호선')) return '#CD7C2F';
-  if (line.includes('7호선')) return '#747F00';
-  if (line.includes('8호선')) return '#E6186C';
-  if (line.includes('9호선')) return '#BDB092';
-  return '#666666';
+const getLineColor = (line: string, isHighContrast: boolean): string => {
+  const lineName = Object.keys(lineColors).find(key => line.includes(key));
+  if (lineName) {
+    return isHighContrast ? lineColors[lineName].highContrast : lineColors[lineName].normal;
+  }
+  return '#666666'; // Default color
 };
 
 const getDifficultyColor = (score: number | null): string => {
@@ -175,7 +170,7 @@ export function MapPage({ selectedRoute }: MapPageProps) {
           if (result.status === 'fulfilled' && result.value.routes[0]) {
             newPolylines.push({
               path: result.value.routes[0].overview_path,
-              color: getLineColor(selectedRoute.lines![index]),
+              color: getLineColor(selectedRoute.lines![index], isHighContrast),
             });
           } else {
             console.warn(`구간 경로를 가져오지 못했습니다: ${result.reason || '알 수 없음'}`);
@@ -189,12 +184,10 @@ export function MapPage({ selectedRoute }: MapPageProps) {
 
         markers.push({
           position: originPos,
-          label: '출발',
           info: { title: '출발역', content: `${originStation.name} (${originStation.line})` },
         });
         markers.push({
           position: { lat: parseFloat(destinationStation.lat as string), lng: parseFloat(destinationStation.lng as string) },
-          label: '도착',
           info: { title: '도착역', content: `${destinationStation.name} (${destinationStation.line})` },
         });
 
@@ -254,7 +247,7 @@ export function MapPage({ selectedRoute }: MapPageProps) {
     };
 
     displayRoute();
-  }, [selectedRoute]);
+  }, [selectedRoute, isHighContrast]);
 
 
   return (
@@ -272,8 +265,8 @@ export function MapPage({ selectedRoute }: MapPageProps) {
       </div>
 
       {/* 검색창 */}
-      <div className="absolute top-4 left-1/2 -translate-x-1/2 w-full max-w-md px-4 z-10">
-        <div className="flex gap-2">
+      <div className="absolute top-4 left-1/2 -translate-x-1/2 px-4 z-10" style={{ width: '30vw' }}>
+        <div className="flex gap-2 w-full">
           <Input ref={searchInputRef} type="text" placeholder="장소, 주소 검색.. (역 이름만)" className="flex-1 bg-white shadow-lg border-2" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && handleSearch()} />
           <Button size="icon" className="shadow-lg shrink-0" onClick={handleSearch} disabled={isSearching}>
             {isSearching ? <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" /> : <Search className="w-5 h-5" />}
