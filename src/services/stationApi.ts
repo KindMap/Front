@@ -1,4 +1,4 @@
-const API_BASE_URL = 'https://k5d98563c8.execute-api.us-west-2.amazonaws.com/inha-capstone-03/inha-capstone-03';
+const API_BASE_URL = '/stationapi';
 
 export interface StationData {
   data: {
@@ -20,7 +20,7 @@ export interface TransferConvenienceData {
 }
 
 export async function getStationByCd(stationCd: string): Promise<StationData> {
-  const response = await fetch(`${API_BASE_URL}/${stationCd}`);
+  const response = await fetch(`${API_BASE_URL}/stations/${stationCd}`);
   if (!response.ok) {
     throw new Error(`Failed to fetch station data for code: ${stationCd}`);
   }

@@ -61,9 +61,10 @@
           target: 'http://35.92.117.143:8001',
           changeOrigin: true,
         },
-        '/inha-capstone-03': {
+        '/stationapi': {
           target: 'https://k5d98563c8.execute-api.us-west-2.amazonaws.com',
           changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/stationapi/, '/inha-capstone-03'),
         },
       },
     },
