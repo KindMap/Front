@@ -24,7 +24,7 @@ import { Route, Facility, Obstacle } from '../types';
 import { GoogleMapComponent, CustomPolyline, CustomMarker } from './GoogleMapComponent';
 import { ScrollArea } from './ui/scroll-area';
 import {
-  getStationById,
+  getStationByCd,
   getTransferConvenience,
   StationData,
   searchStations,
@@ -134,7 +134,7 @@ export function MapPage({ selectedRoute }: MapPageProps) {
       setRouteError(null);
       
       try {
-        const stationPromises = selectedRoute.path.map(id => getStationById(id));
+        const stationPromises = selectedRoute.path.map(id => getStationByCd(id));
         const stationResults = await Promise.allSettled(stationPromises);
         const validStations = stationResults
           .map(r => (r.status === 'fulfilled' && r.value.data) ? r.value.data : null)

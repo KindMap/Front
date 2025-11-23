@@ -1,5 +1,4 @@
-
-const BASE_URL = import.meta.env.VITE_AWS_API_GATEWAY_URL || '/inha-capstone-03';
+const API_BASE_URL = 'https://k5d98563c8.execute-api.us-west-2.amazonaws.com/inha-capstone-03/inha-capstone-03';
 
 export interface StationData {
   data: {
@@ -20,25 +19,21 @@ export interface TransferConvenienceData {
   }
 }
 
-export async function getStationById(stationId: string): Promise<StationData> {
-  // Note: The user provided the URL with "staions", which might be a typo for "stations".
-  // Using the provided URL first.
-  const response = await fetch(`${BASE_URL}/stations/${stationId}`);
+export async function getStationByCd(stationCd: string): Promise<StationData> {
+  const response = await fetch(`${API_BASE_URL}/${stationCd}`);
   if (!response.ok) {
-    throw new Error(`Failed to fetch station data for ID: ${stationId}`);
+    throw new Error(`Failed to fetch station data for code: ${stationCd}`);
   }
   return response.json();
 }
 
 export async function getTransferConvenience(stationCd: string): Promise<TransferConvenienceData> {
-  const response = await fetch(`${BASE_URL}/transfer-convenience/${stationCd}`);
+  const response = await fetch(`${API_BASE_URL}/transfer-convenience/${stationCd}`);
   if (!response.ok) {
     throw new Error(`Failed to fetch transfer convenience for station code: ${stationCd}`);
   }
   return response.json();
 }
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export interface StationSearchResult {
   station_id: number;
