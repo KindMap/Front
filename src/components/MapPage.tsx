@@ -23,19 +23,16 @@ import { useVoiceGuide } from '../contexts/VoiceGuideContext';
 import { Route, Facility, Obstacle } from '../types';
 import { GoogleMapComponent, CustomPolyline, CustomMarker } from './GoogleMapComponent';
 import { ScrollArea } from './ui/scroll-area';
-import { getStationById, getTransferConvenience, StationData } from '../services/stationApi';
+import {
+  getStationById,
+  getTransferConvenience,
+  StationData,
+  searchStations,
+  StationSearchResult,
+} from '../services/stationApi';
 
 interface MapPageProps {
   selectedRoute?: Route | null;
-}
-
-interface StationSearchResult {
-  station_id: number;
-  line: string;
-  name: string;
-  lat: string;
-  lng: string;
-  station_cd: string;
 }
 
 const getLineColor = (line: string): string => {
@@ -97,9 +94,7 @@ export function MapPage({ selectedRoute }: MapPageProps) {
     setIsSearchOpen(true);
     setSearchResults([]);
     try {
-      const response = await fetch(`http://35.92.117.143/api/v1/stations/search?q=${searchQuery}&limit=5`);
-      if (!response.ok) throw new Error('Network response was not ok');
-      const data = await response.json();
+      const data = await searchStations(searchQuery);
       setSearchResults(data.results || []);
     } catch (error) {
       console.error('검색 실패:', error);
