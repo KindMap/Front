@@ -1,22 +1,40 @@
 import { useState } from 'react';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, AlertCircle } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Card } from './ui/card';
 import { useNavigate } from 'react-router-dom';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 import { useVoiceGuide } from '../contexts/VoiceGuideContext';
+import { useAuth } from '../contexts/AuthContext';
 
 export function LoginPage() {
   const navigate = useNavigate();
   const { speak } = useVoiceGuide();
+  const { login, error: authError, isLoading } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [localError, setLocalError] = useState<string | null>(null);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Mock login - just navigate back
-    navigate('/');
+    setLocalError(null);
+
+    // 기본 유효성 검증
+    if (!email || !password) {
+      setLocalError('이메일과 비밀번호를 입력해주세요.');
+      speak('이메일과 비밀번호를 입력해주세요');
+      return;
+    }
+
+    try {
+      await login({ email, password });
+      speak('로그인 성공');
+      navigate('/'); // 로그인 성공 시 홈으로 이동
+    } catch (error: any) {
+      setLocalError(error.message || '로그인에 실패했습니다.');
+      speak('로그인 실패. ' + (error.message || '다시 시도해주세요'));
+    }
   };
 
   return (
@@ -43,6 +61,14 @@ export function LoginPage() {
         </div>
 
         <form onSubmit={handleLogin} className="space-y-4">
+          {/* 에러 메시지 표시 */}
+          {(localError || authError) && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex items-start gap-2">
+              <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-red-600">{localError || authError}</p>
+            </div>
+          )}
+
           <div>
             <label className="block mb-2">사용자</label>
             <Input
@@ -51,6 +77,7 @@ export function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               onFocus={() => speak('사용자 입력')}
+              disabled={isLoading}
               required
             />
           </div>
@@ -62,6 +89,7 @@ export function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               onFocus={() => speak('비밀번호 입력')}
+              disabled={isLoading}
               required
             />
           </div>
@@ -69,9 +97,25 @@ export function LoginPage() {
             type="submit"
             className="w-full"
             onMouseEnter={() => speak('로그인하기')}
+            disabled={isLoading}
           >
-            로그인
+            {isLoading ? '로그인 중...' : '로그인'}
           </Button>
+
+          {/* 회원가입 링크 */}
+          <div className="text-center mt-4">
+            <p className="text-sm text-muted-foreground">
+              계정이 없으신가요?{' '}
+              <button
+                type="button"
+                onClick={() => navigate('/signup')}
+                onMouseEnter={() => speak('회원가입')}
+                className="text-primary hover:underline font-medium"
+              >
+                회원가입
+              </button>
+            </p>
+          </div>
         </form>
       </Card>
     </div>

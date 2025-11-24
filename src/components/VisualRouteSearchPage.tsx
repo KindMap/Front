@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowRight, ArrowLeft, Check, Eye } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Check, Eye, Navigation } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Card } from './ui/card';
@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { Route } from '../types';
 import { Label } from './ui/label';
 import { useVoiceGuide } from '../contexts/VoiceGuideContext';
+import { useNavigation } from '../contexts/NavigationContext';
 import { searchRoutes } from '../services/routeApi';
 
 interface VisualRouteSearchPageProps {
@@ -22,6 +23,7 @@ interface VisualRouteSearchPageProps {
 export function VisualRouteSearchPage({ onRouteSelect, addToFavorites = false }: VisualRouteSearchPageProps) {
   const navigate = useNavigate();
   const { speak } = useVoiceGuide();
+  const { startNavigation } = useNavigation();
   const [departure, setDeparture] = useState('');
   const [destination, setDestination] = useState('');
   const [routes, setRoutes] = useState<Route[]>([]);
@@ -70,6 +72,19 @@ export function VisualRouteSearchPage({ onRouteSelect, addToFavorites = false }:
     if (!addToFavorites) {
       navigate('/', { state: { selectedRoute: route } });
     }
+  };
+
+  const handleStartNavigation = (route: Route, e: React.MouseEvent) => {
+    e.stopPropagation();
+    startNavigation(departure, destination, 'VIS');
+    navigate('/navigation', {
+      state: {
+        origin: departure,
+        destination: destination,
+        disabilityType: 'VIS',
+        selectedRoute: route
+      }
+    });
   };
 
   return (
@@ -160,17 +175,32 @@ export function VisualRouteSearchPage({ onRouteSelect, addToFavorites = false }:
                       <div className="text-muted-foreground">최대 환승 난이도: <span className="font-medium text-foreground">{route.maxTransferDifficulty}</span></div>
                     </div>
                   </div>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onMouseEnter={(e) => {
-                      e.stopPropagation();
-                      speak('경로 선택하기');
-                    }}
-                  >
-                    <Check className="w-4 h-4 mr-1" />
-                    선택
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={(e) => handleStartNavigation(route, e)}
+                      onMouseEnter={(e) => {
+                        e.stopPropagation();
+                        speak('실시간 내비게이션 시작');
+                      }}
+                      className="bg-blue-500 text-white hover:bg-blue-600"
+                    >
+                      <Navigation className="w-4 h-4 mr-1" />
+                      내비게이션
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onMouseEnter={(e) => {
+                        e.stopPropagation();
+                        speak('경로 선택하기');
+                      }}
+                    >
+                      <Check className="w-4 h-4 mr-1" />
+                      선택
+                    </Button>
+                  </div>
                 </div>
               </Card>
             ))}

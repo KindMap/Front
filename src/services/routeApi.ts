@@ -1,4 +1,5 @@
 import { Route } from "../types";
+import { tokenManager } from "./tokenManager";
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -31,11 +32,21 @@ export async function searchRoutes(
   disability_type: string
 ): Promise<RouteSuccessResponse> {
   try {
+    // Access token 가져오기
+    const token = tokenManager.getAccessToken();
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
+
+    // 토큰이 있으면 Authorization 헤더 추가
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+
     const response = await fetch(`${BASE_URL}/api/v1/navigation/calculate`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers,
       body: JSON.stringify({
         origin,
         destination,
