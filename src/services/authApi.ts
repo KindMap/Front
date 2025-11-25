@@ -5,10 +5,16 @@
  * Base URL: /api/v1/auth
  */
 
-import { User, LoginRequest, RegisterRequest, TokenResponse } from '../types/auth';
-import { tokenManager } from './tokenManager';
+import {
+  User,
+  LoginRequest,
+  RegisterRequest,
+  TokenResponse,
+} from "../types/auth";
+import { tokenManager } from "./tokenManager";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://35.92.117.143';
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "https://kindmap-for-you.cloud";
 
 export const authApi = {
   /**
@@ -20,20 +26,22 @@ export const authApi = {
    */
   login: async (credentials: LoginRequest): Promise<TokenResponse> => {
     const formData = new URLSearchParams();
-    formData.append('username', credentials.email); // ⚠️ username 필드에 email 전송
-    formData.append('password', credentials.password);
+    formData.append("username", credentials.email); // ⚠️ username 필드에 email 전송
+    formData.append("password", credentials.password);
 
     const response = await fetch(`${API_BASE_URL}/api/v1/auth/login`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
+        "Content-Type": "application/x-www-form-urlencoded",
       },
       body: formData,
     });
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({ detail: '로그인에 실패했습니다.' }));
-      throw new Error(error.detail || '로그인에 실패했습니다.');
+      const error = await response
+        .json()
+        .catch(() => ({ detail: "로그인에 실패했습니다." }));
+      throw new Error(error.detail || "로그인에 실패했습니다.");
     }
 
     const data: TokenResponse = await response.json();
@@ -48,16 +56,18 @@ export const authApi = {
    */
   register: async (data: RegisterRequest): Promise<User> => {
     const response = await fetch(`${API_BASE_URL}/api/v1/auth/register`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(data),
     });
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({ detail: '회원가입에 실패했습니다.' }));
-      throw new Error(error.detail || '회원가입에 실패했습니다.');
+      const error = await response
+        .json()
+        .catch(() => ({ detail: "회원가입에 실패했습니다." }));
+      throw new Error(error.detail || "회원가입에 실패했습니다.");
     }
 
     const user: User = await response.json();
@@ -73,7 +83,7 @@ export const authApi = {
   getCurrentUser: async (): Promise<User> => {
     const token = tokenManager.getAccessToken();
     if (!token) {
-      throw new Error('인증 토큰이 없습니다.');
+      throw new Error("인증 토큰이 없습니다.");
     }
 
     const response = await fetch(`${API_BASE_URL}/api/v1/auth/me`, {
@@ -83,8 +93,10 @@ export const authApi = {
     });
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({ detail: '사용자 정보를 가져올 수 없습니다.' }));
-      throw new Error(error.detail || '사용자 정보를 가져올 수 없습니다.');
+      const error = await response
+        .json()
+        .catch(() => ({ detail: "사용자 정보를 가져올 수 없습니다." }));
+      throw new Error(error.detail || "사용자 정보를 가져올 수 없습니다.");
     }
 
     const user: User = await response.json();
@@ -100,20 +112,22 @@ export const authApi = {
   refreshToken: async (): Promise<TokenResponse> => {
     const refreshToken = tokenManager.getRefreshToken();
     if (!refreshToken) {
-      throw new Error('Refresh token이 없습니다.');
+      throw new Error("Refresh token이 없습니다.");
     }
 
     const response = await fetch(`${API_BASE_URL}/api/v1/auth/refresh`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({ refresh_token: refreshToken }),
     });
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({ detail: '토큰 갱신에 실패했습니다.' }));
-      throw new Error(error.detail || '토큰 갱신에 실패했습니다.');
+      const error = await response
+        .json()
+        .catch(() => ({ detail: "토큰 갱신에 실패했습니다." }));
+      throw new Error(error.detail || "토큰 갱신에 실패했습니다.");
     }
 
     const data: TokenResponse = await response.json();
@@ -132,14 +146,14 @@ export const authApi = {
     if (token) {
       try {
         await fetch(`${API_BASE_URL}/api/v1/auth/logout`, {
-          method: 'POST',
+          method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
       } catch (error) {
         // 로그아웃 API 실패해도 로컬 토큰은 삭제
-        console.error('Logout API failed:', error);
+        console.error("Logout API failed:", error);
       }
     }
 
