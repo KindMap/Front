@@ -93,7 +93,7 @@ src/
 ## 🔌 API 구조
 
 ### 백엔드 API
-**베이스 URL**: `http://35.92.117.143:8001`
+**베이스 URL**: "https://kindmap-for-you.cloud"
 **프록시**: `/api` (Vite 개발 서버 설정)
 
 #### 경로 검색 API
@@ -323,7 +323,7 @@ Data Layer (API/LocalStorage)
 - 자동 브라우저 열기
 - React SWC 플러그인 사용
 - 빌드 출력: build/
-- API 프록시: /api → http://35.92.117.143:8001
+- API 프록시: /api → "https://kindmap-for-you.cloud"
 - 경로 별칭: @ → ./src
 ```
 
