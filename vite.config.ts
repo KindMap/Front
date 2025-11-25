@@ -2,9 +2,6 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "https://kindmap-for-you.cloud";
-
 export default defineConfig({
   plugins: [react()],
   resolve: {
@@ -61,7 +58,7 @@ export default defineConfig({
     open: true,
     proxy: {
       "/api": {
-        target: API_BASE_URL,
+        target: "https://kindmap-for-you.cloud",
         changeOrigin: true,
       },
       "/stationapi": {
