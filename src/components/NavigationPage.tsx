@@ -7,6 +7,7 @@ import { NavigationStatusPanel } from './NavigationStatusPanel';
 import { RouteProgressBar } from './RouteProgressBar';
 import { RouteOptionSelector } from './RouteOptionSelector';
 import { TransferAlert } from './TransferAlert';
+import { getRouteCoordinates, getStationCoordinate } from '../data/stationCoordinates';
 
 const mapContainerStyle = {
   width: '100%',
@@ -36,6 +37,8 @@ export function NavigationPage({
   const { state, switchRoute, endNavigation, recalculateRoute, clearError } = useNavigation();
 
   const [mapCenter, setMapCenter] = useState(defaultCenter);
+  const [currentPosition, setCurrentPosition] = useState<{ lat: number; lng: number } | null>(null);
+  const [routePath, setRoutePath] = useState<{ lat: number; lng: number }[]>([]);
 
   // location.state에서 경로 정보 가져오기
   useEffect(() => {
@@ -44,6 +47,51 @@ export function NavigationPage({
       // 이미 NavigationContext에서 startNavigation이 호출되었다고 가정
     }
   }, [location]);
+
+  // 선택된 경로의 좌표를 폴리라인으로 표시
+  useEffect(() => {
+    if (state.routes.length > 0) {
+      const selectedRoute = state.routes.find(r => r.rank === state.selectedRouteRank);
+
+      if (selectedRoute && selectedRoute.route_sequence) {
+        const coordinates = getRouteCoordinates(selectedRoute.route_sequence);
+        console.log(`[NavigationPage] 경로 로드 완료: ${coordinates.length}개 역 좌표`);
+
+        setRoutePath(coordinates);
+
+        // 경로의 중심으로 지도 이동 (첫 번째 역)
+        if (coordinates.length > 0 && !currentPosition) {
+          setMapCenter(coordinates[0]);
+        }
+      }
+    }
+  }, [state.routes, state.selectedRouteRank, currentPosition]);
+
+  // 실제 GPS 위치로 현재 위치 마커 업데이트
+  useEffect(() => {
+    const watchId = navigator.geolocation.watchPosition(
+      (position) => {
+        const newPos = {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        };
+        setCurrentPosition(newPos);
+        setMapCenter(newPos); // 현재 위치로 지도 중심 이동
+      },
+      (error) => {
+        console.error('[NavigationPage] GPS 위치 추적 실패:', error);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0,
+      }
+    );
+
+    return () => {
+      navigator.geolocation.clearWatch(watchId);
+    };
+  }, []);
 
   // 에러 표시
   useEffect(() => {
@@ -70,11 +118,11 @@ export function NavigationPage({
   };
 
   return (
-    <div className={`relative w-full h-screen ${
+    <div className={`flex flex-col w-full h-screen overflow-hidden ${
       isHighContrast ? 'bg-black' : 'bg-gray-100'
     }`}>
       {/* 헤더 */}
-      <div className={`absolute top-0 left-0 right-0 z-10 ${
+      <div className={`flex-none z-20 ${
         isHighContrast
           ? 'bg-black border-b-2 border-yellow-400'
           : 'bg-white shadow-md'
@@ -134,12 +182,12 @@ export function NavigationPage({
         )}
       </div>
 
-      {/* 지도 영역 */}
-      <div className="w-full h-full pt-20">
+      {/* 지도 영역 - 남은 공간 차지 (노트북 화면 최적화) */}
+      <div className="flex-1 relative" style={{ minHeight: '50vh', maxHeight: '70vh' }}>
         <GoogleMap
           mapContainerStyle={mapContainerStyle}
           center={mapCenter}
-          zoom={14}
+          zoom={15}
           options={{
             disableDefaultUI: false,
             zoomControl: true,
@@ -148,25 +196,61 @@ export function NavigationPage({
             fullscreenControl: true,
           }}
         >
-          {/* 현재 위치 마커 (임시 - 실제로는 Geolocation에서 가져온 위치) */}
-          <Marker
-            position={mapCenter}
-            icon={{
-              path: google.maps.SymbolPath.CIRCLE,
-              scale: 8,
-              fillColor: '#4285F4',
-              fillOpacity: 1,
-              strokeColor: '#ffffff',
-              strokeWeight: 2,
-            }}
-          />
+          {/* 현재 위치 마커 (실시간 GPS) */}
+          {currentPosition && (
+            <Marker
+              position={currentPosition}
+              icon={{
+                path: google.maps.SymbolPath.CIRCLE,
+                scale: 10,
+                fillColor: '#4285F4',
+                fillOpacity: 1,
+                strokeColor: '#ffffff',
+                strokeWeight: 3,
+              }}
+              title="현재 위치"
+            />
+          )}
+
+          {/* 경로 폴리라인 */}
+          {routePath.length > 1 && (
+            <Polyline
+              path={routePath}
+              options={{
+                strokeColor: isHighContrast ? '#FFFF00' : '#2563EB',
+                strokeOpacity: 0.8,
+                strokeWeight: 5,
+                geodesic: true,
+              }}
+            />
+          )}
+
+          {/* 경로 상의 역 마커들 */}
+          {routePath.map((coord, index) => (
+            <Marker
+              key={`route-station-${index}`}
+              position={coord}
+              icon={{
+                path: google.maps.SymbolPath.CIRCLE,
+                scale: 5,
+                fillColor: isHighContrast ? '#FFFF00' : '#2563EB',
+                fillOpacity: 0.6,
+                strokeColor: '#FFFFFF',
+                strokeWeight: 2,
+              }}
+            />
+          ))}
         </GoogleMap>
       </div>
 
-      {/* 하단 정보 패널 */}
-      <div className={`absolute bottom-0 left-0 right-0 z-10 p-4 space-y-3 max-h-[60vh] overflow-y-auto ${
-        isHighContrast ? 'bg-black' : 'bg-transparent'
-      }`}>
+      {/* 하단 정보 패널 - 고정 높이 (노트북 화면 최적화) */}
+      <div
+        className={`flex-none overflow-y-auto z-10 ${
+          isHighContrast ? 'bg-black' : 'bg-white shadow-2xl'
+        }`}
+        style={{ height: '30vh', minHeight: '250px', maxHeight: '400px' }}
+      >
+        <div className="p-4 space-y-3">
         {/* 내비게이션 상태 패널 */}
         <NavigationStatusPanel update={state.currentUpdate} />
 
@@ -214,6 +298,7 @@ export function NavigationPage({
             🔄 경로 재계산
           </button>
         )}
+        </div>
       </div>
     </div>
   );

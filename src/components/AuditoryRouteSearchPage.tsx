@@ -9,6 +9,8 @@ import { Label } from './ui/label';
 import { useVoiceGuide } from '../contexts/VoiceGuideContext';
 import { useNavigation } from '../contexts/NavigationContext';
 import { searchRoutes } from '../services/routeApi';
+import { StationAutocomplete } from './StationAutocomplete';
+import { formatRouteDisplay } from '../utils/routeFormatter';
 
 interface AuditoryRouteSearchPageProps {
   onRouteSelect?: (route: Route) => void;
@@ -53,6 +55,7 @@ export function AuditoryRouteSearchPage({ onRouteSelect, addToFavorites = false 
           avgConvenience: result.avg_convenience,
           avgCongestion: result.avg_congestion,
           maxTransferDifficulty: result.max_transfer_difficulty,
+          transferStations: result.transfer_stations || [],
         };
       });
       setRoutes(formattedRoutes);
@@ -117,28 +120,22 @@ export function AuditoryRouteSearchPage({ onRouteSelect, addToFavorites = false 
         {/* 경로 검색 */}
         <Card className="p-4 mb-4 bg-card shadow-md">
           <div className="space-y-3">
-            <div>
-              <Label htmlFor="departure">출발지</Label>
-              <Input
-                id="departure"
-                placeholder="출발지를 입력하세요"
-                value={departure}
-                onChange={(e) => setDeparture(e.target.value)}
-                className="mt-1"
-                onFocus={() => speak('출발지 입력')}
-              />
-            </div>
-            <div>
-              <Label htmlFor="destination">도착지</Label>
-              <Input
-                id="destination"
-                placeholder="도착지를 입력하세요"
-                value={destination}
-                onChange={(e) => setDestination(e.target.value)}
-                className="mt-1"
-                onFocus={() => speak('도착지 입력')}
-              />
-            </div>
+            <StationAutocomplete
+              id="departure"
+              label="출발지"
+              value={departure}
+              onChange={setDeparture}
+              placeholder="출발역을 입력하세요"
+              required
+            />
+            <StationAutocomplete
+              id="destination"
+              label="도착지"
+              value={destination}
+              onChange={setDestination}
+              placeholder="도착역을 입력하세요"
+              required
+            />
             <Button
               className="w-full"
               onClick={handleSearch}
@@ -168,6 +165,12 @@ export function AuditoryRouteSearchPage({ onRouteSelect, addToFavorites = false 
                       <span className="font-bold text-lg text-blue-600">{route.duration}</span>
                       <span className="text-sm text-muted-foreground">{route.description}</span>
                     </div>
+                    {/* 경로 표시 */}
+                    {route.path && route.path.length > 0 && route.transferStations && (
+                      <div className="text-sm text-foreground font-medium">
+                        {formatRouteDisplay(route.path, route.transferStations)}
+                      </div>
+                    )}
                     <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
                       <div className="text-muted-foreground">난이도: <span className="font-medium text-foreground">{route.difficulty}</span></div>
                       <div className="text-muted-foreground">평균 편의성: <span className="font-medium text-foreground">{route.avgConvenience}</span></div>

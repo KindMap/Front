@@ -50,7 +50,7 @@ export function NavigationProvider({ children }: { children: ReactNode }) {
     disabilityType: null,
   });
 
-  // WebSocket 메시지 핸들러 등록 (연결은 startNavigation에서 수행)
+  // WebSocket 메시지 핸들러 등록 (Lazy connection - 실제 사용 시에만 연결)
   useEffect(() => {
     let isMounted = true;
 
@@ -188,14 +188,31 @@ export function NavigationProvider({ children }: { children: ReactNode }) {
             return;
           }
 
-          // GPS 정확도 확인
-          if (!GeolocationService.isAccuracyGood(position.accuracy, 100)) {
-            console.warn('[Navigation] GPS 정확도가 낮습니다:', position.accuracy, 'm');
+          // GPS 정확도 필터링 (200m 임계값)
+          const ACCURACY_THRESHOLD = 200; // meters
+
+          if (position.accuracy > ACCURACY_THRESHOLD) {
+            console.warn(
+              `[Navigation] GPS 정확도 불량 (${position.accuracy.toFixed(1)}m > ${ACCURACY_THRESHOLD}m) - 전송 건너뜀`
+            );
+            // UI에는 표시하지 않음 (최소 안내 정책)
+            return; // 백엔드로 전송하지 않음
           }
 
-          // WebSocket으로 위치 전송
+          // 정확도가 100m~200m 사이인 경우 경고 로그 (하지만 전송은 함)
+          if (position.accuracy > 100) {
+            console.warn(
+              `[Navigation] GPS 정확도 주의 (${position.accuracy.toFixed(1)}m) - 전송은 계속`
+            );
+          }
+
+          // WebSocket으로 위치 전송 (양호한 정확도만)
+          console.log(
+            `[Navigation] 위치 전송: lat=${position.latitude.toFixed(6)}, ` +
+            `lng=${position.longitude.toFixed(6)}, accuracy=${position.accuracy.toFixed(1)}m`
+          );
           wsService.updateLocation(position.latitude, position.longitude, position.accuracy);
-        }, 5000); // 5초 간격
+        }, 2000); // 2초 간격
       } catch (error) {
         console.error('[Navigation] Geolocation 시작 실패:', error);
         setState((prev) => ({

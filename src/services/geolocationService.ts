@@ -9,14 +9,14 @@ export class GeolocationService {
   private watchId: number | null = null;
   private onPositionUpdate: ((position: GeolocationPosition) => void) | null = null;
   private lastUpdateTime: number = 0;
-  private updateInterval: number = 5000; // 5초
+  private updateInterval: number = 2000; // 2초
 
   /**
    * 위치 추적 시작
    * @param callback - 위치 업데이트 콜백
-   * @param intervalMs - 업데이트 간격 (기본 5초)
+   * @param intervalMs - 업데이트 간격 (기본 2초)
    */
-  startWatching(callback: (position: GeolocationPosition) => void, intervalMs: number = 5000): void {
+  startWatching(callback: (position: GeolocationPosition) => void, intervalMs: number = 2000): void {
     if (!navigator.geolocation) {
       throw new Error('Geolocation을 지원하지 않는 브라우저입니다');
     }

@@ -11,6 +11,7 @@ export interface Route {
   avgConvenience?: number;
   avgCongestion?: number;
   maxTransferDifficulty?: number;
+  transferStations?: string[]; // 환승역 코드 배열
 }
 
 export interface Favorite extends Route {

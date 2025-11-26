@@ -19,6 +19,7 @@ export class WebSocketService {
   private messageHandlers: Map<WebSocketMessageType, (data: any) => void> = new Map();
   private reconnectDelay = 1000;
   private isManualClose = false;
+  private messageQueue: ClientMessage[] = []; // 연결 끊김 시 메시지 저장
 
   constructor(userId: string) {
     this.userId = userId;
@@ -71,6 +72,10 @@ export class WebSocketService {
         this.reconnectAttempts = 0;
         this.isManualClose = false;
         this.startPingInterval();
+
+        // 연결 성공 시 큐에 저장된 메시지 전송
+        this.flushMessageQueue();
+
         resolve();
       };
 
@@ -126,15 +131,37 @@ export class WebSocketService {
   }
 
   /**
-   * 메시지 전송
+   * 메시지 전송 (연결 끊김 시 큐에 저장)
    */
   private send(message: ClientMessage): void {
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
       this.ws.send(JSON.stringify(message));
       console.log('[WebSocket] 메시지 전송:', message.type);
     } else {
-      console.error('[WebSocket] 연결되지 않음 - 현재 상태:', this.ws?.readyState);
-      throw new Error('WebSocket not connected');
+      console.warn('[WebSocket] 연결되지 않음, 메시지 큐에 저장:', message.type);
+      // ping 메시지는 큐에 저장하지 않음
+      if (message.type !== 'ping') {
+        this.messageQueue.push(message);
+        // 큐 크기 제한 (최대 50개)
+        if (this.messageQueue.length > 50) {
+          this.messageQueue.shift();
+        }
+      }
+    }
+  }
+
+  /**
+   * 메시지 큐 비우기 (연결 성공 시)
+   */
+  private flushMessageQueue(): void {
+    if (this.messageQueue.length > 0) {
+      console.log('[WebSocket] 큐에 저장된 메시지 전송:', this.messageQueue.length);
+      while (this.messageQueue.length > 0) {
+        const message = this.messageQueue.shift();
+        if (message && this.ws && this.ws.readyState === WebSocket.OPEN) {
+          this.ws.send(JSON.stringify(message));
+        }
+      }
     }
   }
 

@@ -1,6 +1,7 @@
 import React from 'react';
 import { useHighContrast } from '../contexts/HighContrastContext';
 import { NavigationRoute } from '../types/navigation';
+import { formatRouteDisplay, formatLines } from '../utils/routeFormatter';
 
 interface RouteOptionSelectorProps {
   routes: NavigationRoute[];
@@ -73,9 +74,13 @@ export function RouteOptionSelector({
                 <span>환승 {route.transfers}회</span>
                 <span>평균 편의시설: {route.avg_convenience.toFixed(1)}</span>
               </div>
-              <div className="text-xs">
-                경로: {route.route_sequence.slice(0, 5).join(' → ')}
-                {route.route_sequence.length > 5 && '...'}
+              <div className="flex flex-col gap-1">
+                <div className="text-sm font-medium">
+                  {formatRouteDisplay(route.route_sequence, route.transfer_stations)}
+                </div>
+                <div className="text-xs opacity-80">
+                  {formatLines(route.route_lines)}
+                </div>
               </div>
             </div>
           </button>
