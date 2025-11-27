@@ -11,6 +11,7 @@ import { useNavigation } from '../contexts/NavigationContext';
 import { searchRoutes } from '../services/routeApi';
 import { StationAutocomplete } from './StationAutocomplete';
 import { formatRouteDisplay } from '../utils/routeFormatter';
+import { NavigationRoute } from '../types/navigation';
 
 interface PhysicalDisabilityRouteSearchPageProps {
   onRouteSelect?: (route: Route) => void;
@@ -25,7 +26,7 @@ interface PhysicalDisabilityRouteSearchPageProps {
 export function PhysicalDisabilityRouteSearchPage({ onRouteSelect, addToFavorites = false }: PhysicalDisabilityRouteSearchPageProps) {
   const navigate = useNavigate();
   const { speak } = useVoiceGuide();
-  const { startNavigation } = useNavigation();
+  const { setRouteData } = useNavigation();
   const [departure, setDeparture] = useState('');
   const [destination, setDestination] = useState('');
   const [routes, setRoutes] = useState<Route[]>([]);
@@ -39,6 +40,8 @@ export function PhysicalDisabilityRouteSearchPage({ onRouteSelect, addToFavorite
     try {
       const results = await searchRoutes(departure, destination, "PHY");
       console.log('API Response:', results);
+
+      // UI 표시용 Route 배열
       const formattedRoutes: Route[] = results.routes.map((result: any, index: number) => {
         const score = Math.floor((result.score || 0) * 100);
         const totalMinutes = Math.round(result.total_time || 0);
@@ -59,6 +62,24 @@ export function PhysicalDisabilityRouteSearchPage({ onRouteSelect, addToFavorite
         };
       });
       setRoutes(formattedRoutes);
+
+      // NavigationContext용 NavigationRoute 배열로 변환
+      const navigationRoutes: NavigationRoute[] = results.routes.map((result: any) => ({
+        rank: result.rank || 1,
+        route_sequence: result.route_sequence || [],
+        route_lines: result.route_lines || [],
+        total_time: result.total_time || 0,
+        transfers: result.transfers || 0,
+        transfer_stations: result.transfer_stations || [],
+        transfer_info: result.transfer_info || [],
+        score: result.score || 0,
+        avg_convenience: result.avg_convenience || 0,
+        avg_congestion: result.avg_congestion || 0,
+        max_transfer_difficulty: result.max_transfer_difficulty || 0,
+      }));
+
+      // NavigationContext에 데이터 저장
+      setRouteData(departure, destination, 'PHY', navigationRoutes);
     } catch (error) {
       console.error("Failed to fetch routes:", error);
       setRoutes([]);
@@ -79,17 +100,8 @@ export function PhysicalDisabilityRouteSearchPage({ onRouteSelect, addToFavorite
 
   const handleStartNavigation = (route: Route, e: React.MouseEvent) => {
     e.stopPropagation();
-    // NavigationContext의 startNavigation 호출
-    startNavigation(departure, destination, 'PHY');
-    // NavigationPage로 이동하면서 경로 정보 전달
-    navigate('/navigation', {
-      state: {
-        origin: departure,
-        destination: destination,
-        disabilityType: 'PHY',
-        selectedRoute: route
-      }
-    });
+    // NavigationPage로 이동 (경로 데이터는 이미 Context에 저장됨)
+    navigate('/navigation');
   };
 
   return (

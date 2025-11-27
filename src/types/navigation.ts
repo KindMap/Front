@@ -156,7 +156,8 @@ export interface NavigationRoute {
 // 내비게이션 상태
 export interface NavigationState {
   isConnected: boolean;
-  isNavigating: boolean;
+  isSearching: boolean;  // 경로 계산 중 (검색 페이지)
+  isNavigating: boolean;  // GPS 추적 중 (안내 페이지)
   routeId: string | null;
   routes: NavigationRoute[];
   selectedRouteRank: number;
@@ -165,6 +166,16 @@ export interface NavigationState {
   origin: string | null;
   destination: string | null;
   disabilityType: DisabilityType | null;
+}
+
+// 세션 스토리지 데이터 구조
+export interface SessionData {
+  routeId: string;
+  routes: NavigationRoute[];
+  selectedRouteRank: number;
+  origin: string;
+  destination: string;
+  disabilityType: DisabilityType;
 }
 
 // 모든 서버 메시지 유니온 타입
