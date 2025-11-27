@@ -1,3 +1,5 @@
+import { stationData } from '../data/stationData';
+
 const API_BASE_URL = 'https://k5d98563c8.execute-api.us-west-2.amazonaws.com/inha-capstone-03';
 
 export interface StationData {
@@ -20,11 +22,11 @@ export interface TransferConvenienceData {
 }
 
 export async function getStationByCd(stationCd: string): Promise<StationData> {
-  const response = await fetch(`${API_BASE_URL}/stations/${stationCd}`);
-  if (!response.ok) {
+  const station = stationData.data.find(s => s.station_cd === stationCd);
+  if (!station) {
     throw new Error(`Failed to fetch station data for code: ${stationCd}`);
   }
-  return response.json();
+  return { data: station };
 }
 
 export async function getTransferConvenience(stationCd: string): Promise<TransferConvenienceData> {
@@ -49,9 +51,8 @@ export interface StationSearchResponse {
 }
 
 export async function searchStations(query: string, limit: number = 5): Promise<StationSearchResponse> {
-  const response = await fetch(`${API_BASE_URL}/api/v1/stations/search?q=${query}&limit=${limit}`);
-  if (!response.ok) {
-    throw new Error(`Failed to search for stations with query: ${query}`);
-  }
-  return response.json();
+  const results = stationData.data
+    .filter(station => station.name.includes(query))
+    .slice(0, limit);
+  return { results };
 }
