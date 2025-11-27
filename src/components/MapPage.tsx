@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useContext } from 'react';
+import { useState, useEffect, useRef, useContext, useLayoutEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -44,10 +44,10 @@ const getLineColor = (line: string, isHighContrast: boolean): string => {
 };
 
 const getDifficultyColor = (score: number | null): string => {
-  if (score === null) return '#808080'; // Gray for unknown
-  if (score >= 80) return '#4CAF50'; // Green for easy
-  if (score >= 40) return '#FFC107'; // Yellow for medium
-  return '#F44336'; // Red for hard
+  if (score === null) return '#808080'; // Unknown (Error case)
+  if (score >= 80) return '#4CAF50'; // Easy
+  if (score >= 40) return '#FFC107'; // Medium
+  return '#F44336'; // Hard
 };
 
 export function MapPage({ selectedRoute }: MapPageProps) {
@@ -81,6 +81,10 @@ export function MapPage({ selectedRoute }: MapPageProps) {
   const [routeError, setRouteError] = useState<string | null>(null);
 
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
+
+  // State for dynamic search bar width
+  const [searchBarWidth, setSearchBarWidth] = useState<number | string>('30vw');
 
   // --- Handlers ---
   const handleSearch = async () => {
@@ -249,6 +253,39 @@ export function MapPage({ selectedRoute }: MapPageProps) {
     displayRoute();
   }, [selectedRoute, isHighContrast]);
 
+  // --- Effect for Dynamic Search Bar Width ---
+  useLayoutEffect(() => {
+    const updateWidth = () => {
+      const windowWidth = window.innerWidth;
+      const mobileBreakpoint = 768; // Common breakpoint for mobile
+      
+      // Calculate max width based on static space taken by side elements.
+      const leftControlSpace = 70; // Approx. 16px offset + 40px button width + buffer
+      const rightControlSpace = 70; // Approx. 16px offset + 40px button width + buffer
+      const horizontalBuffer = 40; // Extra safety buffer
+      const maxWidth = windowWidth - leftControlSpace - rightControlSpace - horizontalBuffer;
+
+      let targetWidth;
+
+      if (windowWidth < mobileBreakpoint) {
+        // On mobile, fill the available space.
+        targetWidth = maxWidth;
+      } else {
+        // On desktop, use 50% of the available space.
+        targetWidth = maxWidth * 0.5;
+      }
+      
+      // Set the width, ensuring it doesn't go below a minimum of 150px.
+      setSearchBarWidth(Math.max(150, targetWidth));
+    };
+
+    updateWidth();
+    
+    window.addEventListener('resize', updateWidth);
+    
+    return () => window.removeEventListener('resize', updateWidth);
+  }, []);
+
 
   return (
     <div className="relative w-full h-screen overflow-hidden">
@@ -265,8 +302,12 @@ export function MapPage({ selectedRoute }: MapPageProps) {
       </div>
 
       {/* 검색창 */}
-      <div className="absolute top-4 left-1/2 -translate-x-1/2 px-4 z-10" style={{ width: '30vw' }}>
-        <div className="flex gap-2 w-full">
+      <div className="absolute top-4 left-0 right-0 z-10 pointer-events-none">
+        <div
+          ref={searchContainerRef}
+          style={{ width: searchBarWidth }}
+          className="mx-auto flex items-center gap-2 px-4 pointer-events-auto"
+        >
           <Input ref={searchInputRef} type="text" placeholder="장소, 주소 검색.. (역 이름만)" className="flex-1 bg-white shadow-lg border-2" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && handleSearch()} />
           <Button size="icon" className="shadow-lg shrink-0" onClick={handleSearch} disabled={isSearching}>
             {isSearching ? <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" /> : <Search className="w-5 h-5" />}
@@ -334,7 +375,6 @@ export function MapPage({ selectedRoute }: MapPageProps) {
         <Button size="icon" className="shadow-lg" onClick={() => navigate('/login')}><User className="w-5 h-5" /></Button>
         <Button size="icon" variant="outline" className="shadow-lg bg-white" onClick={handleRefresh}><RefreshCw className="w-5 h-5" /></Button>
         <Button size="icon" variant={showFacilities ? "default" : "outline"} className={`shadow-lg ${!showFacilities ? 'bg-white' : ''}`} onClick={() => setShowFacilities(!showFacilities)}><Building2 className="w-5 h-5" /></Button>
-        <Button size="icon" variant={showObstacles ? "default" : "outline"} className={`shadow-lg ${!showObstacles ? 'bg-white' : ''}`} onClick={() => setShowObstacles(!showObstacles)}><AlertTriangle className="w-5 h-5" /></Button>
         <Button size="icon" variant="outline" className="shadow-lg bg-white" onClick={handleZoomIn} disabled={zoomLevel >= 150}><Plus className="w-5 h-5" /></Button>
         <Button size="icon" variant="outline" className="shadow-lg bg-white" onClick={handleZoomOut} disabled={zoomLevel <= 70}><Minus className="w-5 h-5" /></Button>
         <div className="w-full h-px bg-gray-300 my-1"></div>
