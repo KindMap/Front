@@ -37,7 +37,7 @@ export function ElderlyRouteSearchPage({ onRouteSelect, addToFavorites = false }
     setLoading(true);
     setSearched(false);
     try {
-      const results = await searchRoutes(departure, destination, "ELDERLY");
+      const results = await searchRoutes(departure, destination, "ELD");
       console.log('API Response:', results);
       const formattedRoutes: Route[] = results.routes.map((result: any, index: number) => {
         const score = Math.floor((result.score || 0) * 100);

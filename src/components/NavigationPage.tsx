@@ -150,16 +150,32 @@ export function NavigationPage({
         }`}
       >
         <div className="flex items-center justify-between p-4">
-          <button
-            onClick={() => navigate(-1)}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              isHighContrast
-                ? "bg-yellow-400 text-black hover:bg-yellow-300"
-                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-            }`}
-          >
-            ← 뒤로
-          </button>
+          {/* 좌측: 안내 시작 버튼 또는 뒤로 버튼 */}
+          <div>
+            {!state.isNavigating ? (
+              <button
+                onClick={handleStartGuidance}
+                className={`px-6 py-2 rounded-lg font-bold transition-all ${
+                  isHighContrast
+                    ? "bg-yellow-400 text-black hover:bg-yellow-300 border-2 border-yellow-600"
+                    : "bg-green-600 text-white hover:bg-green-700 shadow-lg"
+                }`}
+              >
+                🚀 안내 시작
+              </button>
+            ) : (
+              <button
+                onClick={() => navigate(-1)}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  isHighContrast
+                    ? "bg-yellow-400 text-black hover:bg-yellow-300"
+                    : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                }`}
+              >
+                ← 뒤로
+              </button>
+            )}
+          </div>
 
           <h1
             className={`text-xl font-bold ${
@@ -278,54 +294,71 @@ export function NavigationPage({
         style={{ height: "30vh", minHeight: "250px", maxHeight: "400px" }}
       >
         <div className="p-4 space-y-3">
-          {/* 안내 시작 전 - 안내 시작 버튼 */}
+          {/* 안내 시작 전 - 선택된 경로 요약 */}
           {!state.isNavigating ? (
-            <div className="flex flex-col items-center justify-center space-y-4 py-8">
-              <div className="text-center">
-                <h2
-                  className={`text-xl font-bold mb-2 ${
-                    isHighContrast ? "text-yellow-400" : "text-gray-900"
-                  }`}
-                >
-                  경로를 확인하세요
-                </h2>
-                <p
-                  className={`text-sm ${
-                    isHighContrast ? "text-yellow-200" : "text-gray-600"
-                  }`}
-                >
-                  {state.origin && state.destination
-                    ? `${state.origin} → ${state.destination}`
-                    : "경로 정보를 불러오는 중..."}
-                </p>
-                <p
-                  className={`text-sm mt-2 ${
-                    isHighContrast ? "text-yellow-200" : "text-gray-600"
-                  }`}
-                >
-                  준비가 되면 안내를 시작하세요
-                </p>
-              </div>
+            <div className="space-y-4">
+              {/* 선택된 경로 요약 정보 */}
+              {state.routes.length > 0 && (() => {
+                const selectedRoute = state.routes.find(r => r.rank === state.selectedRouteRank);
+                if (!selectedRoute) return null;
 
-              {/* 경로 옵션 선택 */}
-              {state.routes.length > 0 && (
-                <RouteOptionSelector
-                  routes={state.routes}
-                  selectedRank={state.selectedRouteRank}
-                  onRouteSelect={switchRoute}
-                />
+                return (
+                  <div className={`rounded-lg p-4 ${
+                    isHighContrast
+                      ? "bg-gray-900 border-2 border-yellow-400"
+                      : "bg-blue-50 border border-blue-200"
+                  }`}>
+                    <h3 className={`text-lg font-bold mb-3 ${
+                      isHighContrast ? "text-yellow-400" : "text-gray-900"
+                    }`}>
+                      선택된 경로 (경로 {state.selectedRouteRank})
+                    </h3>
+                    <div className={`space-y-2 ${
+                      isHighContrast ? "text-yellow-200" : "text-gray-700"
+                    }`}>
+                      <p className="flex items-center gap-2">
+                        <span className="text-lg">⏱️</span>
+                        <span>소요시간: <strong>약 {selectedRoute.total_time}분</strong></span>
+                      </p>
+                      <p className="flex items-center gap-2">
+                        <span className="text-lg">🔄</span>
+                        <span>환승: <strong>{selectedRoute.transfers}회</strong></span>
+                      </p>
+                      {selectedRoute.transfer_stations && selectedRoute.transfer_stations.length > 0 && (
+                        <p className="flex items-start gap-2">
+                          <span className="text-lg">📍</span>
+                          <span>환승역: <strong>{selectedRoute.transfer_stations.join(", ")}</strong></span>
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* 경로 옵션 선택 (다른 경로가 있을 때만) */}
+              {state.routes.length > 1 && (
+                <div>
+                  <p className={`text-sm mb-2 ${
+                    isHighContrast ? "text-yellow-200" : "text-gray-600"
+                  }`}>
+                    다른 경로 선택:
+                  </p>
+                  <RouteOptionSelector
+                    routes={state.routes}
+                    selectedRank={state.selectedRouteRank}
+                    onRouteSelect={switchRoute}
+                  />
+                </div>
               )}
 
-              <button
-                onClick={handleStartGuidance}
-                className={`px-12 py-4 rounded-lg font-bold text-lg transition-all transform hover:scale-105 ${
-                  isHighContrast
-                    ? "bg-yellow-400 text-black hover:bg-yellow-300 border-4 border-yellow-600"
-                    : "bg-green-600 text-white hover:bg-green-700 shadow-lg"
-                }`}
-              >
-                🚀 안내 시작
-              </button>
+              {/* 안내 메시지 */}
+              <div className={`text-center py-2 ${
+                isHighContrast ? "text-yellow-200" : "text-gray-600"
+              }`}>
+                <p className="text-sm">
+                  경로를 확인하고 좌상단 "🚀 안내 시작" 버튼을 눌러주세요
+                </p>
+              </div>
             </div>
           ) : (
             <>
