@@ -5,6 +5,7 @@ import { HighContrastProvider } from './contexts/HighContrastContext';
 import { VoiceGuideProvider } from './contexts/VoiceGuideContext';
 import { AuthProvider } from './contexts/AuthContext';
 import { NavigationProvider } from './contexts/NavigationContext';
+import { ChatbotProvider } from './contexts/ChatbotContext';
 import { MapPage } from './components/MapPage';
 import { UserTypeSelectionPage } from './components/UserTypeSelectionPage';
 import { PhysicalDisabilityRouteSearchPage } from './components/PhysicalDisabilityRouteSearchPage';
@@ -17,6 +18,8 @@ import { SignupPage } from './components/SignupPage';
 import { UserProfilePage } from './components/UserProfilePage';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { NavigationPage } from './components/NavigationPage';
+import { ChatbotFloatingButton } from './components/chatbot/ChatbotFloatingButton';
+import { ChatbotPanel } from './components/chatbot/ChatbotPanel';
 import { Route as RouteType, Favorite } from './types';
 
 const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
@@ -191,9 +194,15 @@ export default function App() {
       <HighContrastProvider>
         <VoiceGuideProvider>
           <NavigationProvider>
-            <Router>
-              <AppContent />
-            </Router>
+            <ChatbotProvider>
+              <Router>
+                <AppContent />
+
+                {/* Chatbot UI - Global Components */}
+                <ChatbotFloatingButton />
+                <ChatbotPanel />
+              </Router>
+            </ChatbotProvider>
           </NavigationProvider>
         </VoiceGuideProvider>
       </HighContrastProvider>
