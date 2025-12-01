@@ -19,17 +19,17 @@ export function ChatbotFloatingButton() {
   console.log('[ChatbotFloatingButton] Rendering:', { isOpen, hasUnread });
 
   return (
-    <div className="fixed bottom-20 right-4 z-50">
+    <div className="fixed bottom-20 right-4 z-[100]" style={{ position: 'fixed', bottom: '5rem', right: '1rem', zIndex: 100 }}>
       <div className="relative">
         <Button
           size="icon"
           variant="outline"
           onClick={toggleChatbot}
-          className="shadow-lg bg-white"
+          className="shadow-lg bg-white hover:bg-gray-100"
           aria-label="챗봇 열기"
           aria-expanded={isOpen}
         >
-          <MessageCircle className="w-5 h-5" />
+          <MessageCircle className="w-5 h-5 text-blue-600" />
         </Button>
         {hasUnread && !isOpen && (
           <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white">

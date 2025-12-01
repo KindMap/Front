@@ -31,7 +31,7 @@ export async function sendMessageToLambda(
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ message }),
+      body: JSON.stringify({ question: message }),
     });
 
     if (!response.ok) {
@@ -40,11 +40,16 @@ export async function sendMessageToLambda(
       throw new Error(`Lambda error: ${response.status} ${response.statusText}`);
     }
 
-    // Lambda returns just the answer text
-    const answerText = await response.text();
-    console.log('[ChatbotApi] Lambda response received');
+    // Lambda returns JSON with "answer" field
+    const data = await response.json();
+    const answerText = data.answer || data.response || JSON.stringify(data);
 
-    return answerText;
+    // Replace escaped newlines with actual newlines
+    const formattedAnswer = answerText.replace(/\\n/g, '\n');
+
+    console.log('[ChatbotApi] Lambda response received:', formattedAnswer);
+
+    return formattedAnswer;
   } catch (error) {
     console.error('[ChatbotApi] sendMessageToLambda failed:', error);
     throw error;
