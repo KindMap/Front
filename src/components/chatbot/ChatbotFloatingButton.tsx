@@ -9,8 +9,6 @@
  */
 
 import { MessageCircle } from 'lucide-react';
-import { Button } from '../ui/button';
-import { Badge } from '../ui/badge';
 import { useChatbot } from '../../contexts/ChatbotContext';
 
 export function ChatbotFloatingButton() {
@@ -19,24 +17,20 @@ export function ChatbotFloatingButton() {
   console.log('[ChatbotFloatingButton] Rendering:', { isOpen, hasUnread });
 
   return (
-    <div className="fixed bottom-20 sm:bottom-24 right-3 sm:right-4 z-[100]">
-      <div className="relative">
-        <Button
-          size="icon"
-          variant="outline"
-          onClick={toggleChatbot}
-          className="shadow-lg bg-white hover:bg-gray-100 h-10 w-10 sm:h-9 sm:w-9"
-          aria-label="챗봇 열기"
-          aria-expanded={isOpen}
-        >
-          <MessageCircle className="w-5 h-5 sm:w-5 sm:h-5 text-blue-600" />
-        </Button>
-        {hasUnread && !isOpen && (
-          <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white">
-            <span className="sr-only">새 메시지</span>
-          </div>
-        )}
-      </div>
-    </div>
+    <button
+      onClick={toggleChatbot}
+      className="fixed bottom-20 sm:bottom-24 right-3 sm:right-4 z-[9999] h-12 w-12 rounded-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 shadow-xl hover:shadow-2xl transition-all duration-200 flex items-center justify-center"
+      style={{ position: 'fixed', zIndex: 9999 }}
+      aria-label="챗봇 열기"
+      aria-expanded={isOpen}
+      type="button"
+    >
+      <MessageCircle className="w-6 h-6 text-white" />
+      {hasUnread && !isOpen && (
+        <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-white animate-pulse">
+          <span className="sr-only">새 메시지</span>
+        </div>
+      )}
+    </button>
   );
 }
