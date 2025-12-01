@@ -51,11 +51,17 @@ export function ChatbotPanel() {
     }
   };
 
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      closeChatbot();
+    }
+  };
+
   return (
-    <Sheet open={isOpen} onOpenChange={closeChatbot}>
-      <SheetContent side="right" className="w-full sm:w-[90vw] md:w-[500px] lg:w-[600px] xl:w-[700px] p-0 flex flex-col">
+    <Sheet open={isOpen} onOpenChange={handleOpenChange}>
+      <SheetContent side="right" className="w-full sm:w-[90vw] md:w-[500px] lg:w-[600px] xl:w-[700px] p-0 !gap-0" style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
         {/* Header */}
-        <SheetHeader className="px-4 sm:px-6 py-3 sm:py-4 border-b">
+        <SheetHeader className="px-4 sm:px-6 py-3 sm:py-4 border-b flex-shrink-0">
           <div className="flex items-center justify-between">
             <SheetTitle className="text-lg font-semibold">
               AI 도우미
@@ -80,13 +86,21 @@ export function ChatbotPanel() {
 
         {/* Error Alert */}
         {error && (
-          <Alert variant="destructive" className="mx-4 mt-4">
+          <Alert variant="destructive" className="mx-4 mt-4 flex-shrink-0">
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}
 
         {/* Messages Area */}
-        <ScrollArea className="flex-1 px-3 sm:px-4" ref={scrollRef}>
+        <div 
+          className="flex-1 overflow-y-auto px-3 sm:px-4" 
+          ref={scrollRef}
+          style={{ 
+            minHeight: 0,
+            maxHeight: '100%',
+            overflowY: 'auto'
+          }}
+        >
           <div className="py-4">
             {messages.length === 0 ? (
               // Empty State
@@ -123,14 +137,16 @@ export function ChatbotPanel() {
               </div>
             )}
           </div>
-        </ScrollArea>
+        </div>
 
         {/* Input Area */}
-        <ChatInput
-          onSend={sendMessage}
-          isLoading={isLoading}
-          placeholder="메시지를 입력하세요..."
-        />
+        <div className="flex-shrink-0">
+          <ChatInput
+            onSend={sendMessage}
+            isLoading={isLoading}
+            placeholder="메시지를 입력하세요..."
+          />
+        </div>
       </SheetContent>
     </Sheet>
   );

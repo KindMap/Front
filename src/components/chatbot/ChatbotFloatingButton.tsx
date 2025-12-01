@@ -19,8 +19,23 @@ export function ChatbotFloatingButton() {
   return (
     <button
       onClick={toggleChatbot}
-      className="fixed bottom-20 sm:bottom-24 right-3 sm:right-4 z-[9999] h-12 w-12 rounded-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 shadow-xl hover:shadow-2xl transition-all duration-200 flex items-center justify-center"
-      style={{ position: 'fixed', zIndex: 9999 }}
+      className="fixed h-12 w-12 rounded-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 shadow-xl hover:shadow-2xl transition-all duration-200 flex items-center justify-center"
+      style={{ 
+        position: 'fixed', 
+        zIndex: 10000,
+        bottom: '80px',
+        right: isOpen ? 'calc(min(90vw, 700px) + 16px)' : '12px',
+        width: '48px',
+        height: '48px',
+        backgroundColor: '#2563eb',
+        borderRadius: '50%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        cursor: 'pointer',
+        pointerEvents: 'auto',
+        transition: 'right 0.3s ease-in-out'
+      }}
       aria-label="챗봇 열기"
       aria-expanded={isOpen}
       type="button"

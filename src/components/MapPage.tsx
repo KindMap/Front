@@ -390,7 +390,7 @@ export function MapPage({ selectedRoute }: MapPageProps) {
 
       {/* 선택된 경로 정보 */}
       {selectedRoute && (isRouteLoading || routeError || routePolylines.length > 0) && (
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-white p-4 rounded-lg shadow-xl max-w-md w-full mx-4">
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-white p-4 rounded-lg shadow-xl max-w-md w-full mx-4 z-[9998]">
           {isRouteLoading && <p>경로 로딩 중...</p>}
           {routeError && <p className="text-red-500">오류: {routeError}</p>}
           {!isRouteLoading && !routeError && routePolylines.length > 0 && (
