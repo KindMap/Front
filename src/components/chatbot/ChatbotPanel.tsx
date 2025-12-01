@@ -53,9 +53,9 @@ export function ChatbotPanel() {
 
   return (
     <Sheet open={isOpen} onOpenChange={closeChatbot}>
-      <SheetContent side="right" className="w-full sm:max-w-md p-0 flex flex-col">
+      <SheetContent side="right" className="w-full sm:w-[90vw] md:w-[500px] lg:w-[600px] xl:w-[700px] p-0 flex flex-col">
         {/* Header */}
-        <SheetHeader className="px-6 py-4 border-b">
+        <SheetHeader className="px-4 sm:px-6 py-3 sm:py-4 border-b">
           <div className="flex items-center justify-between">
             <SheetTitle className="text-lg font-semibold">
               AI 도우미
@@ -86,7 +86,7 @@ export function ChatbotPanel() {
         )}
 
         {/* Messages Area */}
-        <ScrollArea className="flex-1 px-4" ref={scrollRef}>
+        <ScrollArea className="flex-1 px-3 sm:px-4" ref={scrollRef}>
           <div className="py-4">
             {messages.length === 0 ? (
               // Empty State
