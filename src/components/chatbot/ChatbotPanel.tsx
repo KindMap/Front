@@ -103,9 +103,12 @@ export function ChatbotPanel() {
               </div>
             ) : (
               // Message List
-              messages.map((message) => (
-                <MessageBubble key={message.id} message={message} />
-              ))
+              <>
+                {console.log('[ChatbotPanel] Rendering messages:', messages.length)}
+                {messages.map((message) => (
+                  <MessageBubble key={message.id} message={message} />
+                ))}
+              </>
             )}
 
             {/* Loading Indicator */}

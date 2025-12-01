@@ -53,7 +53,7 @@ export function ChatInput({
   const canSend = message.trim().length > 0 && !isDisabled;
 
   return (
-    <div className="border-t bg-background p-4">
+    <div className="border-t bg-background p-3 sm:p-4">
       <div className="flex items-end gap-2">
         <div className="flex-1 relative">
           <Textarea
@@ -91,7 +91,7 @@ export function ChatInput({
       </div>
 
       {/* Helper Text */}
-      <p className="text-xs text-muted-foreground mt-2">
+      <p className="text-xs text-muted-foreground mt-2 hidden sm:block">
         <kbd className="px-1.5 py-0.5 bg-muted rounded text-xs">Enter</kbd>로 전송,{' '}
         <kbd className="px-1.5 py-0.5 bg-muted rounded text-xs">Shift+Enter</kbd>로 줄바꿈
       </p>

@@ -87,6 +87,13 @@ export function ChatbotProvider({ children }: { children: ReactNode }) {
           timestamp: new Date(),
         };
 
+        console.log('[Chatbot] Bot message created:', {
+          id: botMessage.id,
+          contentLength: botMessage.content.length,
+          hasNewlines: botMessage.content.includes('\n'),
+          preview: botMessage.content.substring(0, 100),
+        });
+
         setState((prev) => ({
           ...prev,
           messages: [...prev.messages, botMessage],

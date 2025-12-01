@@ -17,6 +17,14 @@ export function MessageBubble({ message }: MessageBubbleProps) {
   const hasError = message.status === 'error';
   const isSending = message.status === 'sending';
 
+  console.log('[MessageBubble] Rendering:', {
+    id: message.id,
+    sender: message.sender,
+    contentLength: message.content?.length,
+    contentPreview: message.content?.substring(0, 50),
+    hasNewlines: message.content?.includes('\n'),
+  });
+
   const handleSpeak = () => {
     speak(message.content);
   };
@@ -37,10 +45,10 @@ export function MessageBubble({ message }: MessageBubbleProps) {
       </div>
 
       {/* Message Content */}
-      <div className={`flex flex-col gap-1 max-w-[75%] ${isUser ? 'items-end' : ''}`}>
+      <div className={`flex flex-col gap-1 max-w-[85%] sm:max-w-[75%] md:max-w-[70%] ${isUser ? 'items-end' : ''}`}>
         {/* Message Bubble */}
         <div
-          className={`rounded-lg px-4 py-2 break-words ${
+          className={`rounded-lg px-3 py-2 sm:px-4 break-words ${
             isUser
               ? 'bg-primary text-primary-foreground'
               : 'bg-secondary text-secondary-foreground'
