@@ -29,6 +29,12 @@ function AppContent() {
   const location = useLocation();
   const [selectedRoute, setSelectedRoute] = useState<RouteType | null>(null);
 
+  // Check if current page should show chatbot
+  const shouldShowChatbot = !['/login', '/signup'].includes(location.pathname);
+  
+  console.log('[AppContent] Current path:', location.pathname);
+  console.log('[AppContent] shouldShowChatbot:', shouldShowChatbot);
+
   useEffect(() => {
     if (location.state?.selectedRoute) {
       setSelectedRoute(location.state.selectedRoute);
@@ -60,10 +66,11 @@ function AppContent() {
   };
 
   return (
-    <Routes>
-      {/* 공개 라우트 - 로그인 없이 접근 가능 */}
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/signup" element={<SignupPage />} />
+    <>
+      <Routes>
+        {/* 공개 라우트 - 로그인 없이 접근 가능 */}
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<SignupPage />} />
 
       {/* 보호된 라우트 - 로그인 필요 */}
       <Route
@@ -150,8 +157,19 @@ function AppContent() {
       />
 
       {/* 404 - 홈으로 리다이렉트 */}
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+
+      {/* Chatbot UI - Show on all pages except login/signup */}
+      {console.log('[AppContent] Rendering chatbot section, shouldShowChatbot:', shouldShowChatbot)}
+      {shouldShowChatbot && (
+        <>
+          {console.log('[AppContent] Rendering ChatbotFloatingButton and ChatbotPanel')}
+          <ChatbotFloatingButton />
+          <ChatbotPanel />
+        </>
+      )}
+    </>
   );
 }
 
@@ -197,10 +215,6 @@ export default function App() {
             <ChatbotProvider>
               <Router>
                 <AppContent />
-
-                {/* Chatbot UI - Global Components */}
-                <ChatbotFloatingButton />
-                <ChatbotPanel />
               </Router>
             </ChatbotProvider>
           </NavigationProvider>
