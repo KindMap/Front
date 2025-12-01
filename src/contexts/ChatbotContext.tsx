@@ -33,6 +33,8 @@ export function ChatbotProvider({ children }: { children: ReactNode }) {
     hasUnread: false,
   });
 
+  console.log('[ChatbotProvider] Initialized');
+
   /**
    * Generate unique message ID
    */
