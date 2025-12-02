@@ -11,6 +11,9 @@ import { useNavigation } from '../contexts/NavigationContext';
 import { searchRoutes } from '../services/routeApi';
 import { StationAutocomplete } from './StationAutocomplete';
 import { formatRouteDisplay } from '../utils/routeFormatter';
+import { FacilityInfo } from './FacilityInfo';
+import { useAuth } from '../contexts/AuthContext';
+import { stationCache } from '../services/stationCacheService';
 
 interface ElderlyRouteSearchPageProps {
   onRouteSelect?: (route: Route) => void;
@@ -26,6 +29,7 @@ export function ElderlyRouteSearchPage({ onRouteSelect, addToFavorites = false }
   const navigate = useNavigate();
   const { speak } = useVoiceGuide();
   const { startNavigation } = useNavigation();
+  const { user } = useAuth();
   const [departure, setDeparture] = useState('');
   const [destination, setDestination] = useState('');
   const [routes, setRoutes] = useState<Route[]>([]);
@@ -169,6 +173,31 @@ export function ElderlyRouteSearchPage({ onRouteSelect, addToFavorites = false }
                     {route.path && route.path.length > 0 && route.transferStations && (
                       <div className="text-sm text-foreground font-medium">
                         {formatRouteDisplay(route.path, route.transferStations)}
+                      </div>
+                    )}
+                    {/* 환승역 편의시설 정보 */}
+                    {route.transferStations && route.transferStations.length > 0 && (
+                      <div className="mt-2 space-y-1">
+                        <p className="text-xs text-muted-foreground">환승역 편의시설:</p>
+                        <div className="space-y-1">
+                          {route.transferStations.map((stationCode) => {
+                            const stationName = stationCache.getStationName(stationCode) || stationCode;
+                            return (
+                              <div key={stationCode} className="flex items-start gap-2">
+                                <span className="text-xs text-muted-foreground min-w-[60px]">
+                                  📍 {stationName}:
+                                </span>
+                                <FacilityInfo
+                                  stationCode={stationCode}
+                                  disabilityType={user?.disability_type}
+                                  compact={false}
+                                  limit={3}
+                                  expandable={false}
+                                />
+                              </div>
+                            );
+                          })}
+                        </div>
                       </div>
                     )}
                     <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
