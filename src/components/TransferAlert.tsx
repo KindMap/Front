@@ -1,18 +1,23 @@
 import React from 'react';
 import { useHighContrast } from '../contexts/HighContrastContext';
+import { useAuth } from '../contexts/AuthContext';
+import { FacilityInfo } from './FacilityInfo';
 
 interface TransferAlertProps {
   transferFromLine: string;
   transferToLine: string;
   nextStationName: string;
+  nextStationCode?: string;  // 추가
 }
 
 export function TransferAlert({
   transferFromLine,
   transferToLine,
-  nextStationName
+  nextStationName,
+  nextStationCode
 }: TransferAlertProps) {
   const { isHighContrast } = useHighContrast();
+  const { user } = useAuth();
 
   return (
     <div className={`p-4 rounded-lg border-l-4 animate-pulse ${
@@ -40,6 +45,25 @@ export function TransferAlert({
               {transferToLine}
             </span>
           </div>
+          {/* 환승역 편의시설 정보 */}
+          {nextStationCode && (
+            <div className="mt-3 pt-3 border-t border-yellow-300">
+              <p className={`text-xs mb-1 ${
+                isHighContrast ? 'text-yellow-400' : 'text-yellow-700'
+              }`}>
+                환승역 편의시설:
+              </p>
+              <FacilityInfo
+                stationCode={nextStationCode}
+                stationName={nextStationName}
+                disabilityType={user?.disability_type}
+                compact={true}
+                limit={3}
+                expandable={false}
+                className="text-yellow-800"
+              />
+            </div>
+          )}
         </div>
       </div>
     </div>
