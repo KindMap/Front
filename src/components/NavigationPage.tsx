@@ -147,7 +147,7 @@ export function NavigationPage({
         isHighContrast ? "bg-black" : "bg-gray-100"
       }`}
     >
-      {/* 헤더 */}
+      {/* 헤더 - 모바일 반응형 개선 */}
       <div
         className={`flex-none z-20 ${
           isHighContrast
@@ -155,48 +155,50 @@ export function NavigationPage({
             : "bg-white shadow-md"
         }`}
       >
-        <div className="flex items-center justify-between p-4">
+        <div className="flex items-center justify-between p-2 sm:p-4 gap-2">
           {/* 좌측: 안내 시작 버튼 또는 뒤로 버튼 */}
-          <div>
+          <div className="flex-shrink-0">
             {!state.isNavigating ? (
               <button
                 onClick={handleStartGuidance}
                 onMouseEnter={() => speak('안내 시작 버튼')}
-                className={`px-6 py-2 rounded-lg font-bold transition-all ${
+                className={`px-3 py-2 sm:px-6 sm:py-2 rounded-lg text-sm sm:text-base font-bold transition-all ${
                   isHighContrast
                     ? "bg-yellow-400 text-black hover:bg-yellow-300 border-2 border-yellow-600"
                     : "bg-green-600 text-white hover:bg-green-700 shadow-lg"
                 }`}
               >
-                🚀 안내 시작
+                <span className="hidden sm:inline">🚀 안내 시작</span>
+                <span className="sm:hidden">▶️</span>
               </button>
             ) : (
               <button
                 onClick={() => navigate(-1)}
                 onMouseEnter={() => speak('뒤로가기')}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                className={`px-3 py-2 sm:px-4 sm:py-2 rounded-lg text-sm sm:text-base font-medium transition-colors ${
                   isHighContrast
                     ? "bg-yellow-400 text-black hover:bg-yellow-300"
                     : "bg-gray-200 text-gray-700 hover:bg-gray-300"
                 }`}
               >
-                ← 뒤로
+                ←
               </button>
             )}
           </div>
 
           <h1
-            className={`text-xl font-bold ${
+            className={`text-base sm:text-xl font-bold truncate flex-1 text-center ${
               isHighContrast ? "text-yellow-400" : "text-gray-900"
             }`}
           >
-            실시간 경로 안내
+            <span className="hidden sm:inline">실시간 경로 안내</span>
+            <span className="sm:hidden">경로 안내</span>
           </h1>
 
           <button
             onClick={handleEndNavigation}
             onMouseEnter={() => speak('내비게이션 종료 버튼')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+            className={`px-3 py-2 sm:px-4 sm:py-2 rounded-lg text-sm sm:text-base font-medium transition-colors flex-shrink-0 ${
               isHighContrast
                 ? "bg-red-600 text-yellow-400 hover:bg-red-700"
                 : "bg-red-500 text-white hover:bg-red-600"
@@ -206,23 +208,23 @@ export function NavigationPage({
           </button>
         </div>
 
-        {/* 연결 상태 표시 */}
+        {/* 연결 상태 표시 - 모바일 반응형 */}
         {!state.isConnected && (
-          <div className="px-4 pb-3">
-            <div className="bg-yellow-100 border border-yellow-400 text-yellow-800 px-3 py-2 rounded text-sm">
+          <div className="px-2 sm:px-4 pb-2 sm:pb-3">
+            <div className="bg-yellow-100 border border-yellow-400 text-yellow-800 px-2 sm:px-3 py-1 sm:py-2 rounded text-xs sm:text-sm">
               ⚠️ 서버와 연결 중...
             </div>
           </div>
         )}
 
-        {/* 에러 메시지 */}
+        {/* 에러 메시지 - 모바일 반응형 */}
         {state.error && (
-          <div className="px-4 pb-3">
-            <div className="bg-red-100 border border-red-400 text-red-800 px-3 py-2 rounded text-sm flex justify-between items-center">
-              <span>❌ {state.error}</span>
+          <div className="px-2 sm:px-4 pb-2 sm:pb-3">
+            <div className="bg-red-100 border border-red-400 text-red-800 px-2 sm:px-3 py-1 sm:py-2 rounded text-xs sm:text-sm flex justify-between items-center gap-2">
+              <span className="flex-1 truncate">❌ {state.error}</span>
               <button
                 onClick={clearError}
-                className="ml-2 text-red-600 hover:text-red-800 font-bold"
+                className="flex-shrink-0 text-red-600 hover:text-red-800 font-bold text-base"
               >
                 ✕
               </button>
@@ -231,10 +233,9 @@ export function NavigationPage({
         )}
       </div>
 
-      {/* 지도 영역 - 남은 공간 차지 (노트북 화면 최적화) */}
+      {/* 지도 영역 - 모바일 반응형 개선 */}
       <div
-        className="flex-1 relative"
-        style={{ minHeight: "50vh", maxHeight: "70vh" }}
+        className="flex-1 relative min-h-0"
       >
         <GoogleMap
           mapContainerStyle={mapContainerStyle}
@@ -295,14 +296,18 @@ export function NavigationPage({
         </GoogleMap>
       </div>
 
-      {/* 하단 정보 패널 - 고정 높이 (노트북 화면 최적화) */}
+      {/* 하단 정보 패널 - 모바일 반응형 개선 */}
       <div
         className={`flex-none overflow-y-auto z-10 ${
           isHighContrast ? "bg-black" : "bg-white shadow-2xl"
         }`}
-        style={{ height: "30vh", minHeight: "250px", maxHeight: "400px" }}
+        style={{ 
+          height: "auto", 
+          maxHeight: "50vh",
+          minHeight: "200px"
+        }}
       >
-        <div className="p-4 space-y-3">
+        <div className="p-2 sm:p-4 space-y-2 sm:space-y-3">
           {/* 안내 시작 전 - 선택된 경로 요약 */}
           {!state.isNavigating ? (
             <div className="space-y-4">
@@ -312,17 +317,17 @@ export function NavigationPage({
                 if (!selectedRoute) return null;
 
                 return (
-                  <div className={`rounded-lg p-4 ${
+                  <div className={`rounded-lg p-2 sm:p-4 ${
                     isHighContrast
                       ? "bg-gray-900 border-2 border-yellow-400"
                       : "bg-blue-50 border border-blue-200"
                   }`}>
-                    <h3 className={`text-lg font-bold mb-3 ${
+                    <h3 className={`text-base sm:text-lg font-bold mb-2 sm:mb-3 ${
                       isHighContrast ? "text-yellow-400" : "text-gray-900"
                     }`}>
                       선택된 경로 (경로 {state.selectedRouteRank})
                     </h3>
-                    <div className={`space-y-2 ${
+                    <div className={`space-y-1 sm:space-y-2 text-sm sm:text-base ${
                       isHighContrast ? "text-yellow-200" : "text-gray-700"
                     }`}>
                       <p className="flex items-center gap-2">
@@ -405,11 +410,11 @@ export function NavigationPage({
                 />
               )}
 
-              {/* 경로 재계산 버튼 */}
+              {/* 경로 재계산 버튼 - 모바일 반응형 */}
               <button
                 onClick={handleRecalculate}
                 onMouseEnter={() => speak('경로 재계산 버튼')}
-                className={`w-full py-3 rounded-lg font-medium transition-colors ${
+                className={`w-full py-2 sm:py-3 rounded-lg text-sm sm:text-base font-medium transition-colors ${
                   isHighContrast
                     ? "bg-gray-900 text-yellow-400 border-2 border-yellow-400 hover:bg-gray-800"
                     : "bg-blue-500 text-white hover:bg-blue-600"

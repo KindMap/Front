@@ -40,21 +40,21 @@ export function NavigationStatusPanel({ update }: NavigationStatusPanelProps) {
   }
 
   return (
-    <div className={`p-4 rounded-lg ${
+    <div className={`p-2 sm:p-4 rounded-lg ${
       isHighContrast
         ? 'bg-black border-2 border-yellow-400'
         : 'bg-white shadow-lg'
     }`}>
-      {/* 현재 역 */}
-      <div className="mb-4">
-        <div className={`text-sm mb-1 ${
+      {/* 현재 역 - 모바일 반응형 */}
+      <div className="mb-2 sm:mb-4">
+        <div className={`text-xs sm:text-sm mb-1 ${
           isHighContrast ? 'text-yellow-400' : 'text-gray-600'
         }`}>
           현재 역
         </div>
-        <div className="flex items-center gap-2">
-          <span className="text-2xl">🚇</span>
-          <span className={`text-2xl font-bold ${
+        <div className="flex items-center gap-1 sm:gap-2">
+          <span className="text-xl sm:text-2xl">🚇</span>
+          <span className={`text-lg sm:text-2xl font-bold truncate ${
             isHighContrast ? 'text-yellow-400' : 'text-gray-900'
           }`}>
             {update.current_station_name}
@@ -62,18 +62,18 @@ export function NavigationStatusPanel({ update }: NavigationStatusPanelProps) {
         </div>
       </div>
 
-      {/* 다음 역 */}
+      {/* 다음 역 - 모바일 반응형 */}
       {update.next_station_name && (
-        <div className="mb-4">
-          <div className={`text-sm mb-1 ${
+        <div className="mb-2 sm:mb-4">
+          <div className={`text-xs sm:text-sm mb-1 ${
             isHighContrast ? 'text-yellow-400' : 'text-gray-600'
           }`}>
-            다음 역 {update.is_transfer && <span className="text-red-500 font-bold">(환승역)</span>}
+            다음 역 {update.is_transfer && <span className="text-red-500 font-bold text-xs sm:text-sm">(환승역)</span>}
           </div>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="text-2xl">{update.is_transfer ? '🔄' : '➡️'}</span>
-              <span className={`text-xl font-semibold ${
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-1 sm:gap-2 flex-1 min-w-0">
+              <span className="text-xl sm:text-2xl flex-shrink-0">{update.is_transfer ? '🔄' : '➡️'}</span>
+              <span className={`text-base sm:text-xl font-semibold truncate ${
                 update.is_transfer
                   ? (isHighContrast ? 'text-yellow-400 animate-pulse' : 'text-red-600 animate-pulse')
                   : (isHighContrast ? 'text-yellow-400' : 'text-blue-600')
@@ -82,29 +82,29 @@ export function NavigationStatusPanel({ update }: NavigationStatusPanelProps) {
               </span>
             </div>
             {update.distance_to_next !== null && (
-              <span className={`text-lg font-medium ${
+              <span className={`text-sm sm:text-lg font-medium flex-shrink-0 ${
                 isHighContrast ? 'text-yellow-400' : 'text-gray-700'
               }`}>
                 {update.distance_to_next >= 1000
-                  ? `${(update.distance_to_next / 1000).toFixed(1)} km`
-                  : `${Math.round(update.distance_to_next)} m`}
+                  ? `${(update.distance_to_next / 1000).toFixed(1)}km`
+                  : `${Math.round(update.distance_to_next)}m`}
               </span>
             )}
           </div>
           
-          {/* 환승 정보 표시 */}
+          {/* 환승 정보 표시 - 모바일 반응형 */}
           {update.is_transfer && update.transfer_from_line && update.transfer_to_line && (
-            <div className={`mt-2 p-2 rounded-lg border-l-4 ${
+            <div className={`mt-1 sm:mt-2 p-1 sm:p-2 rounded-lg border-l-4 ${
               isHighContrast
                 ? 'bg-gray-900 border-yellow-400 text-yellow-400'
                 : 'bg-yellow-50 border-yellow-500 text-yellow-800'
             }`}>
-              <div className="flex items-center gap-2 text-sm font-semibold">
-                <span className="px-2 py-1 rounded bg-yellow-200 text-yellow-900">
+              <div className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm font-semibold flex-wrap">
+                <span className="px-1 sm:px-2 py-0.5 sm:py-1 rounded bg-yellow-200 text-yellow-900 text-xs sm:text-sm">
                   {update.transfer_from_line}
                 </span>
-                <span>→</span>
-                <span className="px-2 py-1 rounded bg-yellow-200 text-yellow-900">
+                <span className="text-xs sm:text-sm">→</span>
+                <span className="px-1 sm:px-2 py-0.5 sm:py-1 rounded bg-yellow-200 text-yellow-900 text-xs sm:text-sm">
                   {update.transfer_to_line}
                 </span>
               </div>
@@ -113,9 +113,9 @@ export function NavigationStatusPanel({ update }: NavigationStatusPanelProps) {
         </div>
       )}
 
-      {/* 안내 메시지 */}
+      {/* 안내 메시지 - 모바일 반응형 */}
       {update.message && (
-        <div className={`p-3 rounded-lg text-center font-medium ${
+        <div className={`p-2 sm:p-3 rounded-lg text-center text-xs sm:text-base font-medium ${
           isHighContrast
             ? 'bg-gray-900 text-yellow-400'
             : 'bg-blue-50 text-blue-800'
