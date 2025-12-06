@@ -109,35 +109,35 @@ export function PhysicalDisabilityRouteSearchPage({ onRouteSelect, addToFavorite
   };
 
   return (
-    <div className="min-h-screen bg-background p-4">
+    <div className="min-h-screen bg-background p-2 sm:p-4">
       <div className="max-w-2xl mx-auto">
-        {/* 헤더 */}
-        <div className="flex items-center gap-4 mb-6 pt-4">
+        {/* 헤더 - 모바일 반응형 */}
+        <div className="flex items-center gap-2 sm:gap-4 mb-4 sm:mb-6 pt-2 sm:pt-4">
           <Button
             size="icon"
             variant="outline"
             onClick={() => navigate('/user-type-selection')}
-            className="shadow-md"
+            className="shadow-md flex-shrink-0"
             onMouseEnter={() => speak('뒤로가기')}
           >
-            <ArrowLeft className="w-5 h-5" />
+            <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
           </Button>
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-purple-600 rounded-lg">
-              <Accessibility className="w-6 h-6 text-white" />
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+            <div className="p-1.5 sm:p-2 bg-purple-600 rounded-lg flex-shrink-0">
+              <Accessibility className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             </div>
-            <div>
-              <h1 className="mb-1">지체장애인 경로 검색</h1>
-              <p className="text-sm text-muted-foreground">
+            <div className="min-w-0 flex-1">
+              <h1 className="mb-0.5 sm:mb-1 text-base sm:text-lg truncate">지체장애인 경로 검색</h1>
+              <p className="text-xs sm:text-sm text-muted-foreground truncate">
                 접근성을 고려한 최적의 경로를 탐색하세요.
               </p>
             </div>
           </div>
         </div>
 
-        {/* 경로 검색 */}
-        <Card className="p-4 mb-4 bg-card shadow-md">
-          <div className="space-y-3">
+        {/* 경로 검색 - 모바일 반응형 */}
+        <Card className="p-3 sm:p-4 mb-3 sm:mb-4 bg-card shadow-md">
+          <div className="space-y-2 sm:space-y-3">
             <StationAutocomplete
               id="departure"
               label="출발지"
@@ -166,62 +166,64 @@ export function PhysicalDisabilityRouteSearchPage({ onRouteSelect, addToFavorite
           </div>
         </Card>
 
-        {/* 검색 결과 */}
+        {/* 검색 결과 - 모바일 반응형 */}
         {searched && routes.length > 0 && (
-          <div className="space-y-3">
-            <h2>추천 경로 ({routes.length}개)</h2>
+          <div className="space-y-2 sm:space-y-3">
+            <h2 className="text-base sm:text-lg">추천 경로 ({routes.length}개)</h2>
             {routes.map((route) => (
               <Card
                 key={route.id}
-                className="p-4 cursor-pointer hover:shadow-lg transition-shadow bg-card"
+                className="p-3 sm:p-4 cursor-pointer hover:shadow-lg transition-shadow bg-card"
                 onClick={() => handleSelectRoute(route)}
                 onMouseEnter={() => speak(`약 ${route.duration}, 난이도 ${route.difficulty}`)}
               >
-                <div className="flex justify-between items-start">
-                  <div className="flex-1 space-y-2">
-                    <div className="flex items-center gap-3">
-                      <span className="font-bold text-lg text-purple-600">{route.duration}</span>
-                      <span className="text-sm text-muted-foreground">{route.description}</span>
+                <div className="flex flex-col sm:flex-row justify-between items-start gap-2">
+                  <div className="flex-1 space-y-1 sm:space-y-2 min-w-0">
+                    <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+                      <span className="font-bold text-base sm:text-lg text-purple-600">{route.duration}</span>
+                      <span className="text-xs sm:text-sm text-muted-foreground">{route.description}</span>
                     </div>
-                    {/* 경로 표시 */}
+                    {/* 경로 표시 - 모바일 반응형 */}
                     {route.path && route.path.length > 0 && route.transferStations && (
-                      <div className="text-sm text-foreground font-medium">
+                      <div className="text-xs sm:text-sm text-foreground font-medium break-words">
                         {formatRouteDisplay(route.path, route.transferStations)}
                       </div>
                     )}
-                    {/* 환승역 편의시설 정보 */}
+                    {/* 환승역 편의시설 정보 - 모바일 반응형 */}
                     {route.transferStations && route.transferStations.length > 0 && (
-                      <div className="mt-2 space-y-1">
+                      <div className="mt-1 sm:mt-2 space-y-1">
                         <p className="text-xs text-muted-foreground">환승역 편의시설:</p>
                         <div className="space-y-1">
                           {route.transferStations.map((stationCode) => {
                             const stationName = stationCache.getStationName(stationCode) || stationCode;
                             return (
-                              <div key={stationCode} className="flex items-start gap-2">
-                                <span className="text-xs text-muted-foreground min-w-[60px]">
+                              <div key={stationCode} className="flex flex-col sm:flex-row items-start gap-1 sm:gap-2">
+                                <span className="text-xs text-muted-foreground flex-shrink-0">
                                   📍 {stationName}:
                                 </span>
-                                <FacilityInfo
-                                  stationCode={stationCode}
-                                  disabilityType={user?.disability_type}
-                                  compact={false}
-                                  limit={3}
-                                  expandable={false}
-                                />
+                                <div className="w-full sm:flex-1">
+                                  <FacilityInfo
+                                    stationCode={stationCode}
+                                    disabilityType={user?.disability_type}
+                                    compact={true}
+                                    limit={3}
+                                    expandable={false}
+                                  />
+                                </div>
                               </div>
                             );
                           })}
                         </div>
                       </div>
                     )}
-                    <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
-                      <div className="text-muted-foreground">난이도: <span className="font-medium text-foreground">{route.difficulty}</span></div>
-                      <div className="text-muted-foreground">평균 편의성: <span className="font-medium text-foreground">{route.avgConvenience}</span></div>
-                      <div className="text-muted-foreground">평균 혼잡도: <span className="font-medium text-foreground">{route.avgCongestion}</span></div>
-                      <div className="text-muted-foreground">최대 환승 난이도: <span className="font-medium text-foreground">{route.maxTransferDifficulty}</span></div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-2 sm:gap-x-4 gap-y-0.5 sm:gap-y-1 text-xs sm:text-sm">
+                      <div className="text-muted-foreground truncate">난이도: <span className="font-medium text-foreground">{route.difficulty}</span></div>
+                      <div className="text-muted-foreground truncate">평균 편의성: <span className="font-medium text-foreground">{route.avgConvenience}</span></div>
+                      <div className="text-muted-foreground truncate">평균 혼잡도: <span className="font-medium text-foreground">{route.avgCongestion}</span></div>
+                      <div className="text-muted-foreground truncate">최대 환승 난이도: <span className="font-medium text-foreground">{route.maxTransferDifficulty}</span></div>
                     </div>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex flex-row gap-2 w-full sm:w-auto sm:flex-col">
                     <Button
                       size="sm"
                       variant="outline"
@@ -230,10 +232,11 @@ export function PhysicalDisabilityRouteSearchPage({ onRouteSelect, addToFavorite
                         e.stopPropagation();
                         speak('실시간 내비게이션 시작');
                       }}
-                      className="bg-blue-500 text-white hover:bg-blue-600"
+                      className="bg-blue-500 text-white hover:bg-blue-600 flex-1 sm:flex-none text-xs sm:text-sm"
                     >
-                      <Navigation className="w-4 h-4 mr-1" />
-                      내비게이션
+                      <Navigation className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+                      <span className="hidden sm:inline">내비게이션</span>
+                      <span className="sm:hidden">안내</span>
                     </Button>
                     <Button
                       size="sm"

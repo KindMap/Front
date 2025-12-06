@@ -95,10 +95,10 @@ export function VisualRouteSearchPage({ onRouteSelect, addToFavorites = false }:
   };
 
   return (
-    <div className="min-h-screen bg-background p-4">
+    <div className="min-h-screen bg-background p-2 sm:p-4">
       <div className="max-w-2xl mx-auto">
-        {/* 헤더 */}
-        <div className="flex items-center gap-4 mb-6 pt-4">
+        {/* 헤더 - 모바일 반응형 */}
+        <div className="flex items-center gap-2 sm:gap-4 mb-4 sm:mb-6 pt-2 sm:pt-4">
           <Button
             size="icon"
             variant="outline"
@@ -108,22 +108,22 @@ export function VisualRouteSearchPage({ onRouteSelect, addToFavorites = false }:
           >
             <ArrowLeft className="w-5 h-5" />
           </Button>
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-orange-600 rounded-lg">
-              <Eye className="w-6 h-6 text-white" />
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+            <div className="p-1.5 sm:p-2 bg-orange-600 rounded-lg flex-shrink-0">
+              <Eye className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             </div>
-            <div>
-              <h1 className="mb-1">시각장애인 경로 검색</h1>
-              <p className="text-sm text-muted-foreground">
+            <div className="min-w-0 flex-1">
+              <h1 className="mb-0.5 sm:mb-1 text-base sm:text-lg truncate">시각장애인 경로 검색</h1>
+              <p className="text-xs sm:text-sm text-muted-foreground truncate">
                 음성 안내와 함께 명확한 정보로 경로를 탐색하세요.
               </p>
             </div>
           </div>
         </div>
 
-        {/* 경로 검색 */}
-        <Card className="p-4 mb-4 bg-card shadow-md">
-          <div className="space-y-3">
+        {/* 경로 검색 - 모바일 반응형 */}
+        <Card className="p-3 sm:p-4 mb-3 sm:mb-4 bg-card shadow-md">
+          <div className="space-y-2 sm:space-y-3">
             <StationAutocomplete
               id="departure"
               label="출발지"
