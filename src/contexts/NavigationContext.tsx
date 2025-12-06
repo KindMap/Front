@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback, Rea
 import { WebSocketService } from '../services/websocketService';
 import { GeolocationService } from '../services/geolocationService';
 import { useAuth } from './AuthContext';
+import { useVoiceGuide } from './VoiceGuideContext';
 import {
   NavigationState,
   NavigationRoute,
@@ -60,6 +61,9 @@ const NavigationContext = createContext<NavigationContextType | undefined>(undef
 export function NavigationProvider({ children }: { children: ReactNode }) {
   // AuthContext에서 실제 user_id 가져오기
   const { user } = useAuth();
+  
+  // VoiceGuide 훅 추가
+  const { speak } = useVoiceGuide();
 
   // 게스트 사용자를 위한 임시 ID (한 번만 생성)
   const guestIdRef = useRef<string>(`guest_${Date.now()}`);
@@ -145,6 +149,20 @@ export function NavigationProvider({ children }: { children: ReactNode }) {
           ...prev,
           currentUpdate: data,
         }));
+
+        // 환승 안내 음성 출력
+        if (data.is_transfer && data.transfer_from_line && data.transfer_to_line && data.next_station_name) {
+          const transferMessage = `다음 역 ${data.next_station_name}에서 환승하세요. ${data.transfer_from_line}에서 ${data.transfer_to_line}로 환승합니다.`;
+          speak(transferMessage);
+          console.log('[Navigation] 환승 안내 음성 출력:', transferMessage);
+        }
+        // 일반 다음 역 안내 (환승이 아닐 때)
+        else if (data.next_station_name && data.distance_to_next !== null) {
+          const distanceInMeters = Math.round(data.distance_to_next);
+          const nextStationMessage = `다음 역은 ${data.next_station_name}입니다. 거리는 약 ${distanceInMeters}미터입니다.`;
+          speak(nextStationMessage);
+          console.log('[Navigation] 다음 역 안내 음성 출력:', nextStationMessage);
+        }
       }
     });
 
@@ -156,6 +174,11 @@ export function NavigationProvider({ children }: { children: ReactNode }) {
           ...prev,
           error: `경로 이탈: ${data.message}`,
         }));
+        
+        // 경로 이탈 음성 안내
+        const deviationMessage = `경로를 이탈했습니다. ${data.suggested_action || '경로를 재계산하시겠습니까?'}`;
+        speak(deviationMessage);
+        console.log('[Navigation] 경로 이탈 음성 안내:', deviationMessage);
       }
       // 필요시 자동 재계산 로직 추가 가능
     });
@@ -169,6 +192,11 @@ export function NavigationProvider({ children }: { children: ReactNode }) {
           isNavigating: false,
         }));
         geoService.stopWatching();
+        
+        // 도착 음성 안내
+        const arrivalMessage = `목적지 ${data.destination}에 도착했습니다. 안내를 종료합니다.`;
+        speak(arrivalMessage);
+        console.log('[Navigation] 도착 음성 안내:', arrivalMessage);
       }
     });
 
@@ -180,6 +208,11 @@ export function NavigationProvider({ children }: { children: ReactNode }) {
           ...prev,
           selectedRouteRank: data.new_rank,
         }));
+        
+        // 경로 전환 음성 안내
+        const switchMessage = `경로 ${data.new_rank}번으로 변경되었습니다.`;
+        speak(switchMessage);
+        console.log('[Navigation] 경로 전환 음성 안내:', switchMessage);
       }
     });
 
@@ -192,6 +225,10 @@ export function NavigationProvider({ children }: { children: ReactNode }) {
           routeId: data.route_id,
           routes: data.routes,
         }));
+        
+        // 경로 재계산 완료 음성 안내
+        speak('경로가 재계산되었습니다. 새로운 경로로 안내합니다.');
+        console.log('[Navigation] 경로 재계산 음성 안내');
       }
     });
 

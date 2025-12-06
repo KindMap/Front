@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { GoogleMap, Marker, Polyline } from "@react-google-maps/api";
 import { useHighContrast } from "../contexts/HighContrastContext";
 import { useNavigation } from "../contexts/NavigationContext";
+import { useVoiceGuide } from "../contexts/VoiceGuideContext";
 import { NavigationStatusPanel } from "./NavigationStatusPanel";
 import { RouteProgressBar } from "./RouteProgressBar";
 import { RouteOptionSelector } from "./RouteOptionSelector";
@@ -37,6 +38,7 @@ export function NavigationPage({
   const navigate = useNavigate();
   const location = useLocation();
   const { isHighContrast } = useHighContrast();
+  const { speak } = useVoiceGuide();
   const { state, startGuidance, stopNavigation, switchRoute, recalculateRoute, clearError } =
     useNavigation();
 
@@ -109,21 +111,24 @@ export function NavigationPage({
   // 에러 표시
   useEffect(() => {
     if (state.error) {
+      speak(`오류가 발생했습니다. ${state.error}`);
       // 5초 후 에러 메시지 자동 제거
       const timer = setTimeout(() => {
         clearError();
       }, 5000);
       return () => clearTimeout(timer);
     }
-  }, [state.error, clearError]);
+  }, [state.error, clearError, speak]);
 
   const handleStartGuidance = () => {
     console.log('[NavigationPage] 안내 시작 버튼 클릭');
+    speak('실시간 경로 안내를 시작합니다');
     startGuidance();
   };
 
   const handleEndNavigation = () => {
     if (window.confirm("내비게이션을 종료하시겠습니까?")) {
+      speak('내비게이션을 종료합니다');
       stopNavigation();
       navigate(-1); // 이전 페이지로 돌아가기
     }
@@ -131,6 +136,7 @@ export function NavigationPage({
 
   const handleRecalculate = () => {
     if (window.confirm("경로를 재계산하시겠습니까?")) {
+      speak('경로를 다시 계산합니다');
       recalculateRoute();
     }
   };
@@ -155,6 +161,7 @@ export function NavigationPage({
             {!state.isNavigating ? (
               <button
                 onClick={handleStartGuidance}
+                onMouseEnter={() => speak('안내 시작 버튼')}
                 className={`px-6 py-2 rounded-lg font-bold transition-all ${
                   isHighContrast
                     ? "bg-yellow-400 text-black hover:bg-yellow-300 border-2 border-yellow-600"
@@ -166,6 +173,7 @@ export function NavigationPage({
             ) : (
               <button
                 onClick={() => navigate(-1)}
+                onMouseEnter={() => speak('뒤로가기')}
                 className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                   isHighContrast
                     ? "bg-yellow-400 text-black hover:bg-yellow-300"
@@ -187,6 +195,7 @@ export function NavigationPage({
 
           <button
             onClick={handleEndNavigation}
+            onMouseEnter={() => speak('내비게이션 종료 버튼')}
             className={`px-4 py-2 rounded-lg font-medium transition-colors ${
               isHighContrast
                 ? "bg-red-600 text-yellow-400 hover:bg-red-700"
@@ -399,6 +408,7 @@ export function NavigationPage({
               {/* 경로 재계산 버튼 */}
               <button
                 onClick={handleRecalculate}
+                onMouseEnter={() => speak('경로 재계산 버튼')}
                 className={`w-full py-3 rounded-lg font-medium transition-colors ${
                   isHighContrast
                     ? "bg-gray-900 text-yellow-400 border-2 border-yellow-400 hover:bg-gray-800"
