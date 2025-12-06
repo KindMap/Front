@@ -68,6 +68,9 @@ export function NavigationProvider({ children }: { children: ReactNode }) {
   // 게스트 사용자를 위한 임시 ID (한 번만 생성)
   const guestIdRef = useRef<string>(`guest_${Date.now()}`);
 
+  // 음성 안내 횟수 추적 (역별로 2회까지만)
+  const announcementCountRef = useRef<Map<string, number>>(new Map());
+
   // WebSocketService 인스턴스는 한 번만 생성 (이벤트 리스너 유지)
   const [wsService] = useState(() => new WebSocketService(guestIdRef.current));
   const [geoService] = useState(() => new GeolocationService());
@@ -150,18 +153,38 @@ export function NavigationProvider({ children }: { children: ReactNode }) {
           currentUpdate: data,
         }));
 
-        // 환승 안내 음성 출력
-        if (data.is_transfer && data.transfer_from_line && data.transfer_to_line && data.next_station_name) {
-          const transferMessage = `다음 역 ${data.next_station_name}에서 환승하세요. ${data.transfer_from_line}에서 ${data.transfer_to_line}로 환승합니다.`;
-          speak(transferMessage);
-          console.log('[Navigation] 환승 안내 음성 출력:', transferMessage);
-        }
-        // 일반 다음 역 안내 (환승이 아닐 때)
-        else if (data.next_station_name && data.distance_to_next !== null) {
-          const distanceInMeters = Math.round(data.distance_to_next);
-          const nextStationMessage = `다음 역은 ${data.next_station_name}입니다. 거리는 약 ${distanceInMeters}미터입니다.`;
-          speak(nextStationMessage);
-          console.log('[Navigation] 다음 역 안내 음성 출력:', nextStationMessage);
+        // 역별 안내 횟수 추적 키 생성
+        const stationKey = data.next_station_name || data.current_station_name || 'unknown';
+        const currentCount = announcementCountRef.current.get(stationKey) || 0;
+
+        // 2회까지만 음성 안내
+        if (currentCount < 2) {
+          // 환승역이면 무조건 환승 안내 우선 (is_transfer만으로 판단)
+          if (data.is_transfer && data.next_station_name) {
+            // 완전한 환승 정보가 있으면 상세 안내
+            if (data.transfer_from_line && data.transfer_to_line) {
+              const transferMessage = `다음 역 ${data.next_station_name}에서 환승하세요. ${data.transfer_from_line}에서 ${data.transfer_to_line}로 환승합니다.`;
+              speak(transferMessage);
+              console.log(`[Navigation] 환승 안내 음성 출력 (완전) (${currentCount + 1}/2):`, transferMessage);
+            } 
+            // 환승역이지만 완전한 정보가 없을 때 (백엔드에서 단계적으로 보낼 경우)
+            else {
+              const transferMessage = `다음 역 ${data.next_station_name}은 환승역입니다. 환승 준비를 해주세요.`;
+              speak(transferMessage);
+              console.log(`[Navigation] 환승 안내 음성 출력 (간단) (${currentCount + 1}/2):`, transferMessage);
+            }
+            announcementCountRef.current.set(stationKey, currentCount + 1);
+          }
+          // 일반 역 안내 (환승이 아닐 때만)
+          else if (data.next_station_name && data.distance_to_next !== null) {
+            const distanceInMeters = Math.round(data.distance_to_next);
+            const nextStationMessage = `다음 역은 ${data.next_station_name}입니다. 거리는 약 ${distanceInMeters}미터입니다.`;
+            speak(nextStationMessage);
+            console.log(`[Navigation] 다음 역 안내 음성 출력 (${currentCount + 1}/2):`, nextStationMessage);
+            announcementCountRef.current.set(stationKey, currentCount + 1);
+          }
+        } else {
+          console.log(`[Navigation] 안내 횟수 초과 (2회 완료) - 음성 건너뜀:`, stationKey);
         }
       }
     });
@@ -421,6 +444,11 @@ export function NavigationProvider({ children }: { children: ReactNode }) {
       }
 
       console.log('[Navigation] GPS 추적 시작');
+      
+      // 안내 시작 시 음성 안내 횟수 카운터 초기화
+      announcementCountRef.current.clear();
+      console.log('[Navigation] 음성 안내 횟수 카운터 초기화');
+      
       setState(prev => ({ ...prev, isNavigating: true, error: null }));
     } catch (error) {
       console.error('[Navigation] 안내 시작 실패:', error);
@@ -451,6 +479,10 @@ export function NavigationProvider({ children }: { children: ReactNode }) {
     }
     // 세션 스토리지 클리어
     sessionStorage.removeItem(SESSION_STORAGE_KEY);
+    
+    // 음성 안내 횟수 카운터 초기화
+    announcementCountRef.current.clear();
+    console.log('[Navigation] 음성 안내 횟수 카운터 초기화');
 
     setState((prev) => ({
       ...prev,

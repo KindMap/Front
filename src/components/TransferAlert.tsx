@@ -1,7 +1,6 @@
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import { useHighContrast } from '../contexts/HighContrastContext';
 import { useAuth } from '../contexts/AuthContext';
-import { useVoiceGuide } from '../contexts/VoiceGuideContext';
 import { FacilityInfo } from './FacilityInfo';
 
 interface TransferAlertProps {
@@ -19,20 +18,9 @@ export function TransferAlert({
 }: TransferAlertProps) {
   const { isHighContrast } = useHighContrast();
   const { user } = useAuth();
-  const { speak } = useVoiceGuide();
   
-  // 환승 안내 중복 출력 방지를 위한 ref
-  const hasAnnouncedRef = useRef(false);
-
-  // 환승 알림이 표시될 때 한 번만 음성 안내 (컴포넌트 마운트 시)
-  useEffect(() => {
-    if (!hasAnnouncedRef.current) {
-      const transferMessage = `주의! 다음 역 ${nextStationName}에서 ${transferFromLine}에서 ${transferToLine}로 환승하세요.`;
-      speak(transferMessage);
-      hasAnnouncedRef.current = true;
-      console.log('[TransferAlert] 환승 알림 컴포넌트 음성 출력:', transferMessage);
-    }
-  }, [nextStationName, transferFromLine, transferToLine, speak]);
+  // TransferAlert는 시각적 표시만 담당
+  // 음성 안내는 NavigationContext에서 이미 2회 제한으로 처리됨
 
   return (
     <div className={`p-4 rounded-lg border-l-4 animate-pulse ${
