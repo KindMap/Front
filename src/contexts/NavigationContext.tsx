@@ -66,7 +66,7 @@ export function NavigationProvider({ children }: { children: ReactNode }) {
   const { speak } = useVoiceGuide();
 
   // 게스트 사용자를 위한 임시 ID (한 번만 생성)
-  const guestIdRef = useRef<string>(`guest_${Date.now()}`);
+  const guestIdRef = useRef<string>(`temp_${Date.now()}`);
 
   // 음성 안내 횟수 추적 (역별로 2회까지만)
   const announcementCountRef = useRef<Map<string, number>>(new Map());

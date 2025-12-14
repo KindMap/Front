@@ -33,7 +33,7 @@ export function AuditoryRouteSearchPage({ onRouteSelect, addToFavorites = false 
   const { user } = useAuth();
   
   // 임시 userId 생성 (로그인하지 않은 사용자용)
-  const tempUserId = useMemo(() => `guest-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`, []);
+  const tempUserId = useMemo(() => `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`, []);
   const effectiveUserId = user?.id || tempUserId;
   
   const [departure, setDeparture] = useState('');
