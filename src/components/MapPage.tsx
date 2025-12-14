@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { useHighContrast } from '../contexts/HighContrastContext';
 import { useVoiceGuide } from '../contexts/VoiceGuideContext';
+import { useAuth } from '../contexts/AuthContext';
 import { Route, Facility, Obstacle } from '../types';
 import { GoogleMapComponent, CustomPolyline, CustomMarker } from './GoogleMapComponent';
 import { ScrollArea } from './ui/scroll-area';
@@ -54,6 +55,7 @@ export function MapPage({ selectedRoute }: MapPageProps) {
   const navigate = useNavigate();
   const { isHighContrast, toggleHighContrast } = useHighContrast();
   const { isVoiceGuideEnabled, toggleVoiceGuide, speak } = useVoiceGuide();
+  const { user } = useAuth();
 
   // UI States
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -372,7 +374,14 @@ export function MapPage({ selectedRoute }: MapPageProps) {
 
       {/* 오른쪽 컨트롤 버튼 */}
       <div className="absolute top-4 right-4 flex flex-col gap-2 z-10">
-        <Button size="icon" className="shadow-lg" onClick={() => navigate('/profile')}><User className="w-5 h-5" /></Button>
+        <Button 
+          size="icon" 
+          className="shadow-lg" 
+          onClick={() => navigate(user ? '/profile' : '/login')}
+          title={user ? '프로필' : '로그인'}
+        >
+          <User className="w-5 h-5" />
+        </Button>
         <Button size="icon" variant="outline" className="shadow-lg bg-white" onClick={handleRefresh}><RefreshCw className="w-5 h-5" /></Button>
         <Button size="icon" variant={showFacilities ? "default" : "outline"} className={`shadow-lg ${!showFacilities ? 'bg-white' : ''}`} onClick={() => setShowFacilities(!showFacilities)}><Building2 className="w-5 h-5" /></Button>
         <Button size="icon" variant="outline" className="shadow-lg bg-white" onClick={handleZoomIn} disabled={zoomLevel >= 150}><Plus className="w-5 h-5" /></Button>

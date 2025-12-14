@@ -72,68 +72,40 @@ function AppContent() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
 
-      {/* 보호된 라우트 - 로그인 필요 */}
+      {/* 메인 페이지 - 로그인 불필요 */}
       <Route
         path="/"
-        element={
-          <ProtectedRoute>
-            <MapPage selectedRoute={selectedRoute} />
-          </ProtectedRoute>
-        }
+        element={<MapPage selectedRoute={selectedRoute} />}
       />
 
-      {/* 사용자 유형 선택 페이지 */}
+      {/* 사용자 유형 선택 페이지 - 로그인 불필요 */}
       <Route
         path="/user-type-selection"
-        element={
-          <ProtectedRoute>
-            <UserTypeSelectionPage />
-          </ProtectedRoute>
-        }
+        element={<UserTypeSelectionPage />}
       />
 
-      {/* 각 사용자 유형별 경로검색 페이지 */}
+      {/* 각 사용자 유형별 경로검색 페이지 - 로그인 불필요 */}
       <Route
         path="/route-search/physical-disability"
-        element={
-          <ProtectedRoute>
-            <PhysicalDisabilityRouteSearchPage onRouteSelect={handleRouteSelect} addToFavorites={location.search.includes('addToFavorites=true')} />
-          </ProtectedRoute>
-        }
+        element={<PhysicalDisabilityRouteSearchPage onRouteSelect={handleRouteSelect} addToFavorites={location.search.includes('addToFavorites=true')} />}
       />
       <Route
         path="/route-search/auditory"
-        element={
-          <ProtectedRoute>
-            <AuditoryRouteSearchPage onRouteSelect={handleRouteSelect} addToFavorites={location.search.includes('addToFavorites=true')} />
-          </ProtectedRoute>
-        }
+        element={<AuditoryRouteSearchPage onRouteSelect={handleRouteSelect} addToFavorites={location.search.includes('addToFavorites=true')} />}
       />
       <Route
         path="/route-search/elderly"
-        element={
-          <ProtectedRoute>
-            <ElderlyRouteSearchPage onRouteSelect={handleRouteSelect} addToFavorites={location.search.includes('addToFavorites=true')} />
-          </ProtectedRoute>
-        }
+        element={<ElderlyRouteSearchPage onRouteSelect={handleRouteSelect} addToFavorites={location.search.includes('addToFavorites=true')} />}
       />
       <Route
         path="/route-search/visual"
-        element={
-          <ProtectedRoute>
-            <VisualRouteSearchPage onRouteSelect={handleRouteSelect} addToFavorites={location.search.includes('addToFavorites=true')} />
-          </ProtectedRoute>
-        }
+        element={<VisualRouteSearchPage onRouteSelect={handleRouteSelect} addToFavorites={location.search.includes('addToFavorites=true')} />}
       />
 
-      {/* 즐겨찾기 페이지 */}
+      {/* 즐겨찾기 페이지 - 로그인 불필요 */}
       <Route
         path="/favorites"
-        element={
-          <ProtectedRoute>
-            <FavoritesPage />
-          </ProtectedRoute>
-        }
+        element={<FavoritesPage />}
       />
 
       {/* 사용자 프로필 페이지 */}
@@ -146,14 +118,10 @@ function AppContent() {
         }
       />
 
-      {/* 실시간 내비게이션 페이지 */}
+      {/* 실시간 내비게이션 페이지 - 로그인 불필요 */}
       <Route
         path="/navigation"
-        element={
-          <ProtectedRoute>
-            <NavigationPage />
-          </ProtectedRoute>
-        }
+        element={<NavigationPage />}
       />
 
       {/* 404 - 홈으로 리다이렉트 */}
