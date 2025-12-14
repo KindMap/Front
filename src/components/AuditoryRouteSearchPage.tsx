@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { ArrowRight, ArrowLeft, Check, Ear, Navigation } from 'lucide-react';
 import { VoiceInputButton } from './VoiceInputButton';
 import { Button } from './ui/button';
@@ -32,6 +32,11 @@ export function AuditoryRouteSearchPage({ onRouteSelect, addToFavorites = false 
   const { speak } = useVoiceGuide();
   const { setRouteData } = useNavigation();
   const { user } = useAuth();
+  
+  // 임시 userId 생성 (로그인하지 않은 사용자용)
+  const tempUserId = useMemo(() => `guest-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`, []);
+  const effectiveUserId = user?.id || tempUserId;
+  
   const [departure, setDeparture] = useState('');
   const [destination, setDestination] = useState('');
   const [routes, setRoutes] = useState<Route[]>([]);
@@ -181,20 +186,18 @@ export function AuditoryRouteSearchPage({ onRouteSelect, addToFavorites = false 
         <Card className="p-3 sm:p-4 mb-3 sm:mb-4 bg-card shadow-md">
           <div className="space-y-2 sm:space-y-3">
             {/* 음성 입력 버튼 섹션 */}
-            {user?.id && (
-              <div className="flex items-center gap-2 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                <VoiceInputButton
-                  userId={user.id}
-                  onStationsRecognized={handleVoiceStationsRecognized}
-                  onRouteCalculated={handleVoiceRouteCalculated}
-                  disabilityType="AUD"
-                  className="flex-1"
-                />
-                <p className="text-xs sm:text-sm text-muted-foreground flex-shrink-0">
-                  예: "사당역에서 강남역까지"
-                </p>
-              </div>
-            )}
+            <div className="flex items-center gap-2 p-3 bg-blue-50 rounded-lg border border-blue-200">
+              <VoiceInputButton
+                userId={effectiveUserId}
+                onStationsRecognized={handleVoiceStationsRecognized}
+                onRouteCalculated={handleVoiceRouteCalculated}
+                disabilityType="AUD"
+                className="flex-1"
+              />
+              <p className="text-xs sm:text-sm text-muted-foreground flex-shrink-0">
+                예: "사당역에서 강남역까지"
+              </p>
+            </div>
 
             <StationAutocomplete
               id="departure"
