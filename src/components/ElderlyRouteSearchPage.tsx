@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { ArrowRight, ArrowLeft, Check, Users, Navigation } from 'lucide-react';
+import { VoiceInputButton } from './VoiceInputButton';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Card } from './ui/card';
@@ -35,6 +36,47 @@ export function ElderlyRouteSearchPage({ onRouteSelect, addToFavorites = false }
   const [routes, setRoutes] = useState<Route[]>([]);
   const [searched, setSearched] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [isVoiceInput, setIsVoiceInput] = useState(false);
+
+  // 음성 입력 콜백
+  const handleVoiceStationsRecognized = (origin: string, destination: string) => {
+    setDeparture(origin);
+    setDestination(destination);
+    setIsVoiceInput(true);
+
+    speak(`출발지 ${origin}, 도착지 ${destination}이 입력되었습니다.`);
+
+    // 3초 후 하이라이트 제거
+    setTimeout(() => setIsVoiceInput(false), 3000);
+  };
+
+  const handleVoiceRouteCalculated = (routesData: any[]) => {
+    // 백엔드가 자동으로 경로를 계산한 경우
+    if (routesData && routesData.length > 0) {
+      const formattedRoutes: Route[] = routesData.map((result: any, index: number) => {
+        const score = Math.floor((result.score || 0) * 100);
+        const totalMinutes = Math.round(result.total_time || 0);
+
+        return {
+          id: (result.rank || index).toString(),
+          departure: departure || '',
+          destination: destination || '',
+          duration: `약 ${totalMinutes}분`,
+          description: `환승 ${result.transfers || 0}회`,
+          path: result.route_sequence || [],
+          lines: result.route_lines || [],
+          difficulty: score,
+          avgConvenience: result.avg_convenience,
+          avgCongestion: result.avg_congestion,
+          maxTransferDifficulty: result.max_transfer_difficulty,
+          transferStations: result.transfer_stations || [],
+        };
+      });
+      setRoutes(formattedRoutes);
+      setSearched(true);
+      speak(`${formattedRoutes.length}개의 경로를 찾았습니다.`);
+    }
+  };
 
   const handleSearch = async () => {
     if (!departure || !destination) return;
@@ -124,6 +166,22 @@ export function ElderlyRouteSearchPage({ onRouteSelect, addToFavorites = false }
         {/* 경로 검색 - 모바일 반응형 */}
         <Card className="p-3 sm:p-4 mb-3 sm:mb-4 bg-card shadow-md">
           <div className="space-y-2 sm:space-y-3">
+            {/* 음성 입력 버튼 섹션 */}
+            {user?.id && (
+              <div className="flex items-center gap-2 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                <VoiceInputButton
+                  userId={user.id}
+                  onStationsRecognized={handleVoiceStationsRecognized}
+                  onRouteCalculated={handleVoiceRouteCalculated}
+                  disabilityType="ELD"
+                  className="flex-1"
+                />
+                <p className="text-xs sm:text-sm text-muted-foreground flex-shrink-0">
+                  예: "사당역에서 강남역까지"
+                </p>
+              </div>
+            )}
+
             <StationAutocomplete
               id="departure"
               label="출발지"
@@ -131,6 +189,7 @@ export function ElderlyRouteSearchPage({ onRouteSelect, addToFavorites = false }
               onChange={setDeparture}
               placeholder="출발역을 입력하세요"
               required
+              className={isVoiceInput ? "border-green-500 border-2" : ""}
             />
             <StationAutocomplete
               id="destination"
@@ -139,6 +198,7 @@ export function ElderlyRouteSearchPage({ onRouteSelect, addToFavorites = false }
               onChange={setDestination}
               placeholder="도착역을 입력하세요"
               required
+              className={isVoiceInput ? "border-green-500 border-2" : ""}
             />
             <Button
               className="w-full"

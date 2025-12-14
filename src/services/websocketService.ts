@@ -216,6 +216,19 @@ export class WebSocketService {
   }
 
   /**
+   * 음성 입력 전송
+   */
+  sendVoiceInput(audioData: string, audioFormat: string = 'webm', sampleRate: number = 16000): void {
+    const message = {
+      type: 'voice_input' as const,
+      audio_data: audioData,
+      audio_format: audioFormat,
+      sample_rate: sampleRate,
+    };
+    this.send(message);
+  }
+
+  /**
    * 내비게이션 종료
    */
   endNavigation(): void {
