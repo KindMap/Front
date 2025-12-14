@@ -3,9 +3,9 @@ interface ImportMetaEnv {
   readonly VITE_APP_TITLE: string;
 
   // 환경변수 정의
-  VITE_GOOGLE_MAPS_API_KEY: "AIzaSyAvx8bGk5wtq5tTOE5q2S06SkLZJakUItM";
-  VITE_WS_BASE_URL: "ws://35.92.117.143:8001";
-  VITE_API_BASE_URL: "http://35.92.117.143:8001";
+  readonly VITE_GOOGLE_MAPS_API_KEY: string;
+  readonly VITE_WS_BASE_URL: string;
+  readonly VITE_API_BASE_URL: string;
   // 추가될 경우 해당 파일에도 정의 필요
 }
 
