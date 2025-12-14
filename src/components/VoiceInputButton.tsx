@@ -4,7 +4,7 @@ import { Button } from './ui/button';
 import { useVoiceInput } from '../hooks/useVoiceInput';
 import { useVoiceGuide } from '../contexts/VoiceGuideContext';
 import { DisabilityType, NavigationRoute } from '../types/navigation';
-import { cn } from '../lib/utils';
+import { cn } from './ui/utils';
 
 export interface VoiceInputButtonProps {
   userId: string;
