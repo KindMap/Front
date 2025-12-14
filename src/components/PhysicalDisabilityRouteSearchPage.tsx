@@ -292,7 +292,7 @@ export function PhysicalDisabilityRouteSearchPage({ onRouteSelect, addToFavorite
                         e.stopPropagation();
                         speak('실시간 내비게이션 시작');
                       }}
-                      className="bg-blue-500 text-white hover:bg-blue-600 flex-1 sm:flex-none text-xs sm:text-sm"
+                      className="bg-[#3b82f6] text-white hover:bg-[#2563eb] flex-1 sm:flex-none text-xs sm:text-sm"
                     >
                       <Navigation className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
                       <span className="hidden sm:inline">내비게이션</span>
