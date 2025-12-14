@@ -16,7 +16,11 @@ export type WebSocketMessageType =
   | 'route_recalculated'
   | 'navigation_ended'
   | 'error'
-  | 'disconnected';
+  | 'disconnected'
+  | 'voice_input'
+  | 'transcription_started'
+  | 'transcription_complete'
+  | 'stations_recognized';
 
 // 장애 유형
 export type DisabilityType = 'PHY' | 'VIS' | 'AUD' | 'ELD';
@@ -54,6 +58,13 @@ export interface EndNavigationMessage {
 
 export interface PingMessage {
   type: 'ping';
+}
+
+export interface VoiceInputMessage {
+  type: 'voice_input';
+  audio_data: string;
+  audio_format: string;
+  sample_rate: number;
 }
 
 // 서버 → 클라이언트 메시지
@@ -138,6 +149,26 @@ export interface DisconnectedMessage {
   message: string;
 }
 
+export interface TranscriptionStartedMessage {
+  type: 'transcription_started';
+  message: string;
+}
+
+export interface TranscriptionCompleteMessage {
+  type: 'transcription_complete';
+  transcribed_text: string;
+  confidence: number;
+}
+
+export interface StationsRecognizedMessage {
+  type: 'stations_recognized';
+  origin: string;
+  origin_cd: string;
+  destination: string;
+  destination_cd: string;
+  message?: string;
+}
+
 // 경로 정보
 export interface NavigationRoute {
   rank: number;
@@ -190,7 +221,10 @@ export type ServerMessage =
   | NavigationEndedMessage
   | ErrorMessage
   | PongMessage
-  | DisconnectedMessage;
+  | DisconnectedMessage
+  | TranscriptionStartedMessage
+  | TranscriptionCompleteMessage
+  | StationsRecognizedMessage;
 
 // 모든 클라이언트 메시지 유니온 타입
 export type ClientMessage =
@@ -199,4 +233,5 @@ export type ClientMessage =
   | SwitchRouteMessage
   | RecalculateRouteMessage
   | EndNavigationMessage
-  | PingMessage;
+  | PingMessage
+  | VoiceInputMessage;
